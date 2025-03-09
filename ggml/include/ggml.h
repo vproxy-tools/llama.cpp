@@ -310,6 +310,9 @@
     GGML_TENSOR_LOCALS(int64_t, ne1, src1, ne) \
     GGML_TENSOR_LOCALS(size_t,  nb1, src1, nb)
 
+#define GGML_LIKELY  (x) __builtin_expect(!!(x), 1)
+#define GGML_UNLIKELY(x) __builtin_expect(!!(x), 0)
+
 #ifdef  __cplusplus
 extern "C" {
 #endif
@@ -625,6 +628,8 @@ extern "C" {
     static inline void * tensor_data(const struct ggml_tensor * tensor) {
 #ifdef GGML_NUMA_MIRROR
         int n = ggml_current_numa_node;
+        if (n == -1)
+            n = 0;
         return tensor->__data[n];
 #else
         return tensor->data;
@@ -633,8 +638,24 @@ extern "C" {
 
     static inline void tensor_set_data(struct ggml_tensor * tensor, void * data) {
 #ifdef GGML_NUMA_MIRROR
+        if ((uint64_t)data >= \
+                GGML_MMAP_VIRTUAL_MEMORY_BASE_OFFSET + \
+                GGML_MMAP_VIRTUAL_MEMORY_NUMA_INCREMENT && \
+            (uint64_t)data < GGML_MMAP_VIRTUAL_MEMORY_BASE_OFFSET + \
+                2 * GGML_MMAP_VIRTUAL_MEMORY_NUMA_INCREMENT) {
+            data = (void*) ((uint64_t)data - GGML_MMAP_VIRTUAL_MEMORY_NUMA_INCREMENT);
+        }
         tensor->__data[0] = data;
-        tensor->__data[1] = data;
+        if ((uint64_t)data >= \
+                GGML_MMAP_VIRTUAL_MEMORY_BASE_OFFSET && \
+            (uint64_t)data < \
+                GGML_MMAP_VIRTUAL_MEMORY_BASE_OFFSET + \
+                GGML_MMAP_VIRTUAL_MEMORY_NUMA_INCREMENT) {
+            tensor->__data[1] = (void*) ((uint64_t)data + \
+                    GGML_MMAP_VIRTUAL_MEMORY_NUMA_INCREMENT);
+        } else {
+            tensor->__data[1] = data;
+        }
 #else
         tensor->data = data;
 #endif
