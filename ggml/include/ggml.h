@@ -598,21 +598,46 @@ extern "C" {
         struct ggml_tensor * view_src;
         size_t               view_offs;
 
+#ifdef GGML_NUMA_MIRROR
+        union {
+        #ifdef __NVCC__
+            void * data;
+        #endif
+            void * __data[2];
+        };
+#else
         void * data;
+#endif
 
         char name[GGML_MAX_NAME];
 
         void * extra; // extra things e.g. for ggml-cuda.cu
 
+#ifndef GGML_NUMA_MIRROR
         char padding[8];
+#endif
     };
 
+#ifdef GGML_NUMA_MIRROR
+    extern __thread int ggml_current_numa_node;
+#endif
+
     static inline void * tensor_data(const struct ggml_tensor * tensor) {
+#ifdef GGML_NUMA_MIRROR
+        int n = ggml_current_numa_node;
+        return tensor->__data[n];
+#else
         return tensor->data;
+#endif
     }
 
     static inline void tensor_set_data(struct ggml_tensor * tensor, void * data) {
+#ifdef GGML_NUMA_MIRROR
+        tensor->__data[0] = data;
+        tensor->__data[1] = data;
+#else
         tensor->data = data;
+#endif
     }
 
     static const size_t GGML_TENSOR_SIZE = sizeof(struct ggml_tensor);

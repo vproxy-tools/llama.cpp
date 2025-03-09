@@ -60,6 +60,10 @@
 #define m512i(p) (__m512i)(p)
 #endif
 
+#ifdef GGML_NUMA_MIRROR
+__thread int ggml_current_numa_node = 0;
+#endif
+
 // precomputed f32 table for f16 (256 KB) (ggml-impl.h)
 float ggml_table_f32_f16[1 << 16];
 
@@ -1609,10 +1613,16 @@ static struct ggml_tensor * ggml_new_tensor_impl(
         /*.src          =*/ { NULL },
         /*.view_src     =*/ view_src,
         /*.view_offs    =*/ view_offs,
+#ifdef GGML_NUMA_MIRROR
+        /*.data         =*/ { .__data = { NULL, NULL } },
+#else
         /*.data         =*/ NULL,
+#endif
         /*.name         =*/ { 0 },
         /*.extra        =*/ NULL,
+#ifndef GGML_NUMA_MIRROR
         /*.padding      =*/ { 0 },
+#endif
     };
     tensor_set_data(result, obj_alloc_size > 0 ? (void *)(result + 1) : data);
 

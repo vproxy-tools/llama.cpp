@@ -196,6 +196,8 @@ option(GGML_OPENCL_PROFILING                "ggml: use OpenCL profiling (increas
 option(GGML_OPENCL_EMBED_KERNELS            "ggml: embed kernels"                             ON)
 option(GGML_OPENCL_USE_ADRENO_KERNELS       "ggml: use optimized kernels for Adreno"          ON)
 
+option(GGML_NUMA_MIRROR                     "ggml: support numa aware tensor data"            OFF)
+
 # toolchain for vulkan-shaders-gen
 set   (GGML_VULKAN_SHADERS_GEN_TOOLCHAIN "" CACHE FILEPATH "ggml: toolchain file for vulkan-shaders-gen")
 
@@ -314,6 +316,18 @@ set(variable_set_statements
 ")
 
 set(GGML_SHARED_LIB ${BUILD_SHARED_LIBS})
+
+if (GGML_NUMA_MIRROR)
+    message(STATUS
+            "-----------------\n"
+            "Enabling GGML_NUMA_MIRROR"
+    message(STATUS
+            "-----------------")
+
+    foreach(lib "ggml" "ggml-base")
+        target_compile_definitions(${lib} PUBLIC GGML_NUMA_MIRROR)
+    endforeach()
+endif()
 
 get_cmake_property(all_variables VARIABLES)
 foreach(variable_name IN LISTS all_variables)
