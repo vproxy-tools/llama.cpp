@@ -1,3 +1,7 @@
+# add debug symbols
+add_compile_options("-g")
+set(CMAKE_STRIP "/usr/bin/true")
+
 cmake_minimum_required(VERSION 3.14) # for add_link_options and implicit target directories.
 project("llama.cpp" C CXX)
 include(CheckIncludeFileCXX)
