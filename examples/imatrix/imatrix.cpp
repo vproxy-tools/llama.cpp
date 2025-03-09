@@ -97,7 +97,7 @@ bool IMatrixCollector::collect_imatrix(struct ggml_tensor * t, bool ask, void * 
         ggml_backend_tensor_get(src1, m_src1_data.data(), 0, ggml_nbytes(src1));
     }
 
-    const float * data = is_host ? (const float *) src1->data : m_src1_data.data();
+    const float * data = is_host ? (const float *) tensor_data(src1) : m_src1_data.data();
 
     // this has been adapted to the new format of storing merged experts in a single 3d tensor
     // ref: https://github.com/ggml-org/llama.cpp/pull/6387

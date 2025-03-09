@@ -168,7 +168,7 @@ static bool clip_llava_handle_patches(clip_ctx * ctx_clip, std::vector<float *> 
     // fill it with the image embeddings, ignoring the base
     for (size_t i = 1; i < num_images; i++) {
         size_t offset = (i-1) * clip_embd_nbytes(ctx_clip);
-        memcpy((uint8_t *)(image_features->data) + offset, image_embd_v[i], clip_embd_nbytes(ctx_clip));
+        memcpy((uint8_t *)tensor_data(image_features) + offset, image_embd_v[i], clip_embd_nbytes(ctx_clip));
     }
 
     struct ggml_cgraph  * gf = ggml_new_graph(model.ctx);
@@ -202,7 +202,7 @@ static bool clip_llava_handle_patches(clip_ctx * ctx_clip, std::vector<float *> 
 
     memcpy(image_embd_out, image_embd_v[0], clip_embd_nbytes(ctx_clip)); // main image as global context
     // append without newline tokens (default behavior in llava_arch when not using unpad ):
-    memcpy(image_embd_out + clip_n_patches(ctx_clip) * clip_n_mmproj_embd(ctx_clip), (float*)result->data, clip_embd_nbytes(ctx_clip) * (num_images-1)); // grid patches
+    memcpy(image_embd_out + clip_n_patches(ctx_clip) * clip_n_mmproj_embd(ctx_clip), (float*)tensor_data(result), clip_embd_nbytes(ctx_clip) * (num_images-1)); // grid patches
     *n_img_pos_out = static_cast<int>(result->ne[1]+clip_n_patches(ctx_clip));
 
     // Debug: Test single segments

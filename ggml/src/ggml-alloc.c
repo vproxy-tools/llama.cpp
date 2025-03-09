@@ -472,7 +472,7 @@ static bool ggml_gallocr_is_own(ggml_gallocr_t galloc, struct ggml_tensor * t) {
 }
 
 static bool ggml_gallocr_is_allocated(ggml_gallocr_t galloc, struct ggml_tensor * t) {
-    return t->data != NULL || ggml_gallocr_hash_get(galloc, t)->allocated;
+    return tensor_data(t) != NULL || ggml_gallocr_hash_get(galloc, t)->allocated;
 }
 
 static void ggml_gallocr_allocate_node(ggml_gallocr_t galloc, struct ggml_tensor * node, int buffer_id) {
@@ -513,7 +513,7 @@ static void ggml_gallocr_allocate_node(ggml_gallocr_t galloc, struct ggml_tensor
                     if (ggml_is_view(parent)) {
                         struct ggml_tensor * view_src = parent->view_src;
                         struct hash_node * view_src_hn = ggml_gallocr_hash_get(galloc, view_src);
-                        if (view_src_hn->n_views == 1 && view_src_hn->n_children == 0 && view_src->data == parent->data) {
+                        if (view_src_hn->n_views == 1 && view_src_hn->n_children == 0 && tensor_data(view_src) == tensor_data(parent)) {
                             AT_PRINTF("reusing view parent %s (%s) for %s\n", parent->name, view_src->name, node->name);
                             assert(view_src_hn->offset == p_hn->offset);
                             hn->buffer_id = p_hn->buffer_id;
@@ -704,7 +704,7 @@ bool ggml_gallocr_reserve_n(ggml_gallocr_t galloc, struct ggml_cgraph * graph, c
     for (int i = 0; i < graph->n_nodes; i++) {
         struct ggml_tensor * node = graph->nodes[i];
         struct node_alloc * node_alloc = &galloc->node_allocs[i];
-        if (node->view_src || node->data) {
+        if (node->view_src || tensor_data(node)) {
             node_alloc->dst.buffer_id = -1;
             node_alloc->dst.offset = SIZE_MAX;
             node_alloc->dst.size_max = 0;
@@ -716,7 +716,7 @@ bool ggml_gallocr_reserve_n(ggml_gallocr_t galloc, struct ggml_cgraph * graph, c
         }
         for (int j = 0; j < GGML_MAX_SRC; j++) {
             struct ggml_tensor * src = node->src[j];
-            if (!src || src->view_src || src->data) {
+            if (!src || src->view_src || tensor_data(src)) {
                 node_alloc->src[j].buffer_id = -1;
                 node_alloc->src[j].offset = SIZE_MAX;
                 node_alloc->src[j].size_max = 0;
@@ -737,7 +737,7 @@ bool ggml_gallocr_reserve_n(ggml_gallocr_t galloc, struct ggml_cgraph * graph, c
     for (int i = 0; i < graph->n_leafs; i++) {
         struct ggml_tensor * leaf = graph->leafs[i];
         struct hash_node * hn = ggml_gallocr_hash_get(galloc, leaf);
-        if (leaf->view_src || leaf->data) {
+        if (leaf->view_src || tensor_data(leaf)) {
             galloc->leaf_allocs[i].leaf.buffer_id = -1;
             galloc->leaf_allocs[i].leaf.offset = SIZE_MAX;
             galloc->leaf_allocs[i].leaf.size_max = 0;
@@ -798,7 +798,7 @@ static void ggml_gallocr_init_tensor(ggml_gallocr_t galloc, struct ggml_tensor *
             ggml_backend_view_init(tensor);
         }
     } else {
-        if (tensor->data == NULL) {
+        if (tensor_data(tensor) == NULL) {
             assert(tensor_alloc->offset != SIZE_MAX);
             assert(ggml_backend_buffer_get_alloc_size(galloc->buffers[buffer_id], tensor) <= tensor_alloc->size_max);
             void * base = ggml_backend_buffer_get_base(galloc->buffers[buffer_id]);
@@ -815,7 +815,7 @@ static void ggml_gallocr_init_tensor(ggml_gallocr_t galloc, struct ggml_tensor *
 
 static bool ggml_gallocr_node_needs_realloc(ggml_gallocr_t galloc, struct ggml_tensor * node, struct tensor_alloc * talloc) {
     size_t node_size = 0;
-    if (!node->data && !node->view_src) {
+    if (!tensor_data(node) && !node->view_src) {
         GGML_ASSERT(talloc->buffer_id >= 0); // prevent segfault when misusing the API
         node_size = ggml_backend_buft_get_alloc_size(galloc->bufts[talloc->buffer_id], node);
     }
@@ -959,7 +959,7 @@ static bool alloc_tensor_range(struct ggml_context * ctx,
 
     for (struct ggml_tensor * t = first; t != last; t = ggml_get_next_tensor(ctx, t)) {
         enum ggml_status status = GGML_STATUS_SUCCESS;
-        if (t->data == NULL) {
+        if (tensor_data(t) == NULL) {
             if (t->view_src == NULL) {
                 status = ggml_tallocr_alloc(&tallocr, t);
             } else if (t->buffer == NULL) {
@@ -994,7 +994,7 @@ ggml_backend_buffer_t ggml_backend_alloc_ctx_tensors_from_buft(struct ggml_conte
     struct ggml_tensor * first = ggml_get_first_tensor(ctx);
     for (struct ggml_tensor * t = first; t != NULL; t = ggml_get_next_tensor(ctx, t)) {
         size_t this_size = 0;
-        if (t->data == NULL && t->view_src == NULL) {
+        if (tensor_data(t) == NULL && t->view_src == NULL) {
             this_size = GGML_PAD(ggml_backend_buft_get_alloc_size(buft, t), alignment);
         }
 

@@ -2704,7 +2704,7 @@ struct ggml_tensor * ggml_set_i32 (struct ggml_tensor * tensor, int32_t value) {
     const int nc    = tensor->ne[0];
     const size_t n1 = tensor->nb[1];
 
-    char * const data = tensor->data;
+    char * const data = tensor_data(tensor);
 
     switch (tensor->type) {
         case GGML_TYPE_I8:
@@ -2763,7 +2763,7 @@ struct ggml_tensor * ggml_set_f32(struct ggml_tensor * tensor, float value) {
     const int nc    = tensor->ne[0];
     const size_t n1 = tensor->nb[1];
 
-    char * const data = tensor->data;
+    char * const data = tensor_data(tensor);
 
     switch (tensor->type) {
         case GGML_TYPE_I8:
@@ -2827,32 +2827,32 @@ int32_t ggml_get_i32_1d(const struct ggml_tensor * tensor, int i) {
         case GGML_TYPE_I8:
             {
                 GGML_ASSERT(tensor->nb[0] == sizeof(int8_t));
-                return ((int8_t *)(tensor->data))[i];
+                return ((int8_t *)tensor_data(tensor))[i];
             }
         case GGML_TYPE_I16:
             {
                 GGML_ASSERT(tensor->nb[0] == sizeof(int16_t));
-                return ((int16_t *)(tensor->data))[i];
+                return ((int16_t *)tensor_data(tensor))[i];
             }
         case GGML_TYPE_I32:
             {
                 GGML_ASSERT(tensor->nb[0] == sizeof(int32_t));
-                return ((int32_t *)(tensor->data))[i];
+                return ((int32_t *)tensor_data(tensor))[i];
             }
         case GGML_TYPE_F16:
             {
                 GGML_ASSERT(tensor->nb[0] == sizeof(ggml_fp16_t));
-                return GGML_FP16_TO_FP32(((ggml_fp16_t *)(tensor->data))[i]);
+                return GGML_FP16_TO_FP32(((ggml_fp16_t *)tensor_data(tensor))[i]);
             }
         case GGML_TYPE_BF16:
             {
                 GGML_ASSERT(tensor->nb[0] == sizeof(ggml_bf16_t));
-                return GGML_BF16_TO_FP32(((ggml_bf16_t *)(tensor->data))[i]);
+                return GGML_BF16_TO_FP32(((ggml_bf16_t *)tensor_data(tensor))[i]);
             }
         case GGML_TYPE_F32:
             {
                 GGML_ASSERT(tensor->nb[0] == sizeof(float));
-                return ((float *)(tensor->data))[i];
+                return ((float *)tensor_data(tensor))[i];
             }
         default:
             {
@@ -2872,32 +2872,32 @@ void ggml_set_i32_1d(const struct ggml_tensor * tensor, int i, int32_t value) {
         case GGML_TYPE_I8:
             {
                 GGML_ASSERT(tensor->nb[0] == sizeof(int8_t));
-                ((int8_t *)(tensor->data))[i] = value;
+                ((int8_t *)tensor_data(tensor))[i] = value;
             } break;
         case GGML_TYPE_I16:
             {
                 GGML_ASSERT(tensor->nb[0] == sizeof(int16_t));
-                ((int16_t *)(tensor->data))[i] = value;
+                ((int16_t *)tensor_data(tensor))[i] = value;
             } break;
         case GGML_TYPE_I32:
             {
                 GGML_ASSERT(tensor->nb[0] == sizeof(int32_t));
-                ((int32_t *)(tensor->data))[i] = value;
+                ((int32_t *)tensor_data(tensor))[i] = value;
             } break;
         case GGML_TYPE_F16:
             {
                 GGML_ASSERT(tensor->nb[0] == sizeof(ggml_fp16_t));
-                ((ggml_fp16_t *)(tensor->data))[i] = GGML_FP32_TO_FP16(value);
+                ((ggml_fp16_t *)tensor_data(tensor))[i] = GGML_FP32_TO_FP16(value);
             } break;
         case GGML_TYPE_BF16:
             {
                 GGML_ASSERT(tensor->nb[0] == sizeof(ggml_bf16_t));
-                ((ggml_bf16_t *)(tensor->data))[i] = GGML_FP32_TO_BF16(value);
+                ((ggml_bf16_t *)tensor_data(tensor))[i] = GGML_FP32_TO_BF16(value);
             } break;
         case GGML_TYPE_F32:
             {
                 GGML_ASSERT(tensor->nb[0] == sizeof(float));
-                ((float *)(tensor->data))[i] = value;
+                ((float *)tensor_data(tensor))[i] = value;
             } break;
         default:
             {
@@ -2907,7 +2907,7 @@ void ggml_set_i32_1d(const struct ggml_tensor * tensor, int i, int32_t value) {
 }
 
 int32_t ggml_get_i32_nd(const struct ggml_tensor * tensor, int i0, int i1, int i2, int i3) {
-    void * data   = (char *) tensor->data + i0*tensor->nb[0] + i1*tensor->nb[1] + i2*tensor->nb[2] + i3*tensor->nb[3];
+    void * data   = (char *) tensor_data(tensor) + i0*tensor->nb[0] + i1*tensor->nb[1] + i2*tensor->nb[2] + i3*tensor->nb[3];
     switch (tensor->type) {
         case GGML_TYPE_I8:
             return ((int8_t *) data)[0];
@@ -2927,7 +2927,7 @@ int32_t ggml_get_i32_nd(const struct ggml_tensor * tensor, int i0, int i1, int i
 }
 
 void ggml_set_i32_nd(const struct ggml_tensor * tensor, int i0, int i1, int i2, int i3, int32_t value) {
-    void * data   = (char *) tensor->data + i0*tensor->nb[0] + i1*tensor->nb[1] + i2*tensor->nb[2] + i3*tensor->nb[3];
+    void * data   = (char *) tensor_data(tensor) + i0*tensor->nb[0] + i1*tensor->nb[1] + i2*tensor->nb[2] + i3*tensor->nb[3];
     switch (tensor->type) {
         case GGML_TYPE_I8:
             {
@@ -2969,27 +2969,27 @@ float ggml_get_f32_1d(const struct ggml_tensor * tensor, int i) {
     switch (tensor->type) {
         case GGML_TYPE_I8:
             {
-                return ((int8_t *)(tensor->data))[i];
+                return ((int8_t *)tensor_data(tensor))[i];
             }
         case GGML_TYPE_I16:
             {
-                return ((int16_t *)(tensor->data))[i];
+                return ((int16_t *)tensor_data(tensor))[i];
             }
         case GGML_TYPE_I32:
             {
-                return ((int32_t *)(tensor->data))[i];
+                return ((int32_t *)tensor_data(tensor))[i];
             }
         case GGML_TYPE_F16:
             {
-                return GGML_FP16_TO_FP32(((ggml_fp16_t *)(tensor->data))[i]);
+                return GGML_FP16_TO_FP32(((ggml_fp16_t *)tensor_data(tensor))[i]);
             }
         case GGML_TYPE_BF16:
             {
-                return GGML_BF16_TO_FP32(((ggml_bf16_t *)(tensor->data))[i]);
+                return GGML_BF16_TO_FP32(((ggml_bf16_t *)tensor_data(tensor))[i]);
             }
         case GGML_TYPE_F32:
             {
-                return ((float *)(tensor->data))[i];
+                return ((float *)tensor_data(tensor))[i];
             }
         default:
             {
@@ -3008,27 +3008,27 @@ void ggml_set_f32_1d(const struct ggml_tensor * tensor, int i, float value) {
     switch (tensor->type) {
         case GGML_TYPE_I8:
             {
-                ((int8_t *)(tensor->data))[i] = value;
+                ((int8_t *)tensor_data(tensor))[i] = value;
             } break;
         case GGML_TYPE_I16:
             {
-                ((int16_t *)(tensor->data))[i] = value;
+                ((int16_t *)tensor_data(tensor))[i] = value;
             } break;
         case GGML_TYPE_I32:
             {
-                ((int32_t *)(tensor->data))[i] = value;
+                ((int32_t *)tensor_data(tensor))[i] = value;
             } break;
         case GGML_TYPE_F16:
             {
-                ((ggml_fp16_t *)(tensor->data))[i] = GGML_FP32_TO_FP16(value);
+                ((ggml_fp16_t *)tensor_data(tensor))[i] = GGML_FP32_TO_FP16(value);
             } break;
         case GGML_TYPE_BF16:
             {
-                ((ggml_bf16_t *)(tensor->data))[i] = GGML_FP32_TO_BF16(value);
+                ((ggml_bf16_t *)tensor_data(tensor))[i] = GGML_FP32_TO_BF16(value);
             } break;
         case GGML_TYPE_F32:
             {
-                ((float *)(tensor->data))[i] = value;
+                ((float *)tensor_data(tensor))[i] = value;
             } break;
         default:
             {
@@ -3038,7 +3038,7 @@ void ggml_set_f32_1d(const struct ggml_tensor * tensor, int i, float value) {
 }
 
 float ggml_get_f32_nd(const struct ggml_tensor * tensor, int i0, int i1, int i2, int i3) {
-    void * data   = (char *) tensor->data + i0*tensor->nb[0] + i1*tensor->nb[1] + i2*tensor->nb[2] + i3*tensor->nb[3];
+    void * data   = (char *) tensor_data(tensor) + i0*tensor->nb[0] + i1*tensor->nb[1] + i2*tensor->nb[2] + i3*tensor->nb[3];
     switch (tensor->type) {
         case GGML_TYPE_I8:
             return ((int8_t *) data)[0];
@@ -3058,7 +3058,7 @@ float ggml_get_f32_nd(const struct ggml_tensor * tensor, int i0, int i1, int i2,
 }
 
 void ggml_set_f32_nd(const struct ggml_tensor * tensor, int i0, int i1, int i2, int i3, float value) {
-    void * data   = (char *) tensor->data + i0*tensor->nb[0] + i1*tensor->nb[1] + i2*tensor->nb[2] + i3*tensor->nb[3];
+    void * data   = (char *) tensor_data(tensor) + i0*tensor->nb[0] + i1*tensor->nb[1] + i2*tensor->nb[2] + i3*tensor->nb[3];
     switch (tensor->type) {
         case GGML_TYPE_I8:
             {
@@ -3118,8 +3118,8 @@ static void ggml_compute_forward_dup_same_cont(
 
     if (ie0 < ie1) {
         memcpy(
-            ((char *)  dst->data + ie0*nb0),
-            ((char *) src0->data + ie0*nb0),
+            ((char *)  tensor_data(dst) + ie0*nb0),
+            ((char *) tensor_data(src0) + ie0*nb0),
             (ie1 - ie0) * nb0);
     }
 }
@@ -3154,8 +3154,8 @@ static void ggml_compute_forward_dup_f16(
             for (int64_t i02 = 0; i02 < ne02; i02++) {
                 for (int64_t i01 = ir0; i01 < ir1; i01++) {
                     memcpy(
-                        ((char *)  dst->data + i01*nb1  + i02*nb2  + i03*nb3),
-                        ((char *) src0->data + i01*nb01 + i02*nb02 + i03*nb03),
+                        ((char *)  tensor_data(dst) + i01*nb1  + i02*nb2  + i03*nb3),
+                        ((char *) tensor_data(src0) + i01*nb01 + i02*nb02 + i03*nb03),
                         rs);
                 }
             }
@@ -3170,13 +3170,13 @@ static void ggml_compute_forward_dup_f16(
             if (dst->type == GGML_TYPE_F16) {
                 size_t id = 0;
                 const size_t rs = ne00 * nb00;
-                char * dst_ptr = (char *) dst->data;
+                char * dst_ptr = (char *) tensor_data(dst);
 
                 for (int i03 = 0; i03 < ne03; i03++) {
                     for (int i02 = 0; i02 < ne02; i02++) {
                         id += rs * ir0;
                         for (int i01 = ir0; i01 < ir1; i01++) {
-                            const char * src0_ptr = (char *) src0->data + i01*nb01 + i02*nb02 + i03*nb03;
+                            const char * src0_ptr = (char *) tensor_data(src0) + i01*nb01 + i02*nb02 + i03*nb03;
                             memcpy(dst_ptr + id, src0_ptr, rs);
                             id += rs;
                         }
@@ -3185,13 +3185,13 @@ static void ggml_compute_forward_dup_f16(
                 }
             } else if (dst->type == GGML_TYPE_F32) {
                 size_t id = 0;
-                float * dst_ptr = (float *) dst->data;
+                float * dst_ptr = (float *) tensor_data(dst);
 
                 for (int i03 = 0; i03 < ne03; i03++) {
                     for (int i02 = 0; i02 < ne02; i02++) {
                         id += ne00 * ir0;
                         for (int i01 = ir0; i01 < ir1; i01++) {
-                            const ggml_fp16_t * src0_ptr = (ggml_fp16_t *) ((char *) src0->data + i01*nb01 + i02*nb02 + i03*nb03);
+                            const ggml_fp16_t * src0_ptr = (ggml_fp16_t *) ((char *) tensor_data(src0) + i01*nb01 + i02*nb02 + i03*nb03);
                             for (int i00 = 0; i00 < ne00; i00++) {
                                 dst_ptr[id] = GGML_FP16_TO_FP32(src0_ptr[i00]);
                                 id++;
@@ -3206,13 +3206,13 @@ static void ggml_compute_forward_dup_f16(
 
                 size_t id = 0;
                 size_t rs = nb0 * (ne00 / ggml_blck_size(dst->type));
-                char * dst_ptr = (char *) dst->data;
+                char * dst_ptr = (char *) tensor_data(dst);
 
                 for (int i03 = 0; i03 < ne03; i03++) {
                     for (int i02 = 0; i02 < ne02; i02++) {
                         id += rs * ir0;
                         for (int i01 = ir0; i01 < ir1; i01++) {
-                            const ggml_fp16_t * src0_ptr = (ggml_fp16_t *) ((char *) src0->data + i01*nb01 + i02*nb02 + i03*nb03);
+                            const ggml_fp16_t * src0_ptr = (ggml_fp16_t *) ((char *) tensor_data(src0) + i01*nb01 + i02*nb02 + i03*nb03);
 
                             for (int i00 = 0; i00 < ne00; i00++) {
                                 src0_f32[i00] = GGML_FP16_TO_FP32(src0_ptr[i00]);
@@ -3232,14 +3232,14 @@ static void ggml_compute_forward_dup_f16(
 
             if (dst->type == GGML_TYPE_F32) {
                 size_t id = 0;
-                float * dst_ptr = (float *) dst->data;
+                float * dst_ptr = (float *) tensor_data(dst);
 
                 for (int i03 = 0; i03 < ne03; i03++) {
                     for (int i02 = 0; i02 < ne02; i02++) {
                         id += ne00 * ir0;
                         for (int i01 = ir0; i01 < ir1; i01++) {
                             for (int i00 = 0; i00 < ne00; i00++) {
-                                const ggml_fp16_t * src0_ptr = (ggml_fp16_t *) ((char *) src0->data + i00*nb00 + i01*nb01 + i02*nb02 + i03*nb03);
+                                const ggml_fp16_t * src0_ptr = (ggml_fp16_t *) ((char *) tensor_data(src0) + i00*nb00 + i01*nb01 + i02*nb02 + i03*nb03);
 
                                 dst_ptr[id] = GGML_FP16_TO_FP32(*src0_ptr);
                                 id++;
@@ -3250,14 +3250,14 @@ static void ggml_compute_forward_dup_f16(
                 }
             } else if (dst->type == GGML_TYPE_F16) {
                 size_t id = 0;
-                ggml_fp16_t * dst_ptr = (ggml_fp16_t *) dst->data;
+                ggml_fp16_t * dst_ptr = (ggml_fp16_t *) tensor_data(dst);
 
                 for (int i03 = 0; i03 < ne03; i03++) {
                     for (int i02 = 0; i02 < ne02; i02++) {
                         id += ne00 * ir0;
                         for (int i01 = ir0; i01 < ir1; i01++) {
                             for (int i00 = 0; i00 < ne00; i00++) {
-                                const ggml_fp16_t * src0_ptr = (ggml_fp16_t *) ((char *) src0->data + i00*nb00 + i01*nb01 + i02*nb02 + i03*nb03);
+                                const ggml_fp16_t * src0_ptr = (ggml_fp16_t *) ((char *) tensor_data(src0) + i00*nb00 + i01*nb01 + i02*nb02 + i03*nb03);
 
                                 dst_ptr[id] = *src0_ptr;
                                 id++;
@@ -3297,8 +3297,8 @@ static void ggml_compute_forward_dup_f16(
                 }
                 for (int64_t i01 = ir0; i01 < ir1; i01++) {
                     for (int64_t i00 = 0; i00 < ne00; i00++) {
-                        const char * src0_ptr = ((char *) src0->data + i00*nb00 + i01*nb01 + i02*nb02 + i03*nb03);
-                              char * dst_ptr  = ((char *)  dst->data + i10*nb0  + i11*nb1  + i12*nb2  + i13*nb3);
+                        const char * src0_ptr = ((char *) tensor_data(src0) + i00*nb00 + i01*nb01 + i02*nb02 + i03*nb03);
+                              char * dst_ptr  = ((char *)  tensor_data(dst) + i10*nb0  + i11*nb1  + i12*nb2  + i13*nb3);
 
                         memcpy(dst_ptr, src0_ptr, sizeof(ggml_fp16_t));
 
@@ -3349,8 +3349,8 @@ static void ggml_compute_forward_dup_f16(
                 }
                 for (int64_t i01 = ir0; i01 < ir1; i01++) {
                     for (int64_t i00 = 0; i00 < ne00; i00++) {
-                        const char * src0_ptr = ((char *) src0->data + i00*nb00 + i01*nb01 + i02*nb02 + i03*nb03);
-                              char * dst_ptr  = ((char *)  dst->data + i10*nb0  + i11*nb1  + i12*nb2  + i13*nb3);
+                        const char * src0_ptr = ((char *) tensor_data(src0) + i00*nb00 + i01*nb01 + i02*nb02 + i03*nb03);
+                              char * dst_ptr  = ((char *)  tensor_data(dst) + i10*nb0  + i11*nb1  + i12*nb2  + i13*nb3);
 
                         *(float *) dst_ptr = GGML_FP16_TO_FP32(*(const ggml_fp16_t *) src0_ptr);
 
@@ -3418,8 +3418,8 @@ static void ggml_compute_forward_dup_bf16(
             for (int64_t i02 = 0; i02 < ne02; i02++) {
                 for (int64_t i01 = ir0; i01 < ir1; i01++) {
                     memcpy(
-                        ((char *)  dst->data + i01*nb1  + i02*nb2  + i03*nb3),
-                        ((char *) src0->data + i01*nb01 + i02*nb02 + i03*nb03),
+                        ((char *)  tensor_data(dst) + i01*nb1  + i02*nb2  + i03*nb3),
+                        ((char *) tensor_data(src0) + i01*nb01 + i02*nb02 + i03*nb03),
                         rs);
                 }
             }
@@ -3434,13 +3434,13 @@ static void ggml_compute_forward_dup_bf16(
             if (dst->type == GGML_TYPE_BF16) {
                 size_t id = 0;
                 const size_t rs = ne00 * nb00;
-                char * dst_ptr = (char *) dst->data;
+                char * dst_ptr = (char *) tensor_data(dst);
 
                 for (int i03 = 0; i03 < ne03; i03++) {
                     for (int i02 = 0; i02 < ne02; i02++) {
                         id += rs * ir0;
                         for (int i01 = ir0; i01 < ir1; i01++) {
-                            const char * src0_ptr = (char *) src0->data + i01*nb01 + i02*nb02 + i03*nb03;
+                            const char * src0_ptr = (char *) tensor_data(src0) + i01*nb01 + i02*nb02 + i03*nb03;
                             memcpy(dst_ptr + id, src0_ptr, rs);
                             id += rs;
                         }
@@ -3449,13 +3449,13 @@ static void ggml_compute_forward_dup_bf16(
                 }
             } else if (dst->type == GGML_TYPE_F16) {
                 size_t id = 0;
-                ggml_fp16_t * dst_ptr = (ggml_fp16_t *) dst->data;
+                ggml_fp16_t * dst_ptr = (ggml_fp16_t *) tensor_data(dst);
 
                 for (int i03 = 0; i03 < ne03; i03++) {
                     for (int i02 = 0; i02 < ne02; i02++) {
                         id += ne00 * ir0;
                         for (int i01 = ir0; i01 < ir1; i01++) {
-                            const ggml_bf16_t * src0_ptr = (ggml_bf16_t *) ((char *) src0->data + i01*nb01 + i02*nb02 + i03*nb03);
+                            const ggml_bf16_t * src0_ptr = (ggml_bf16_t *) ((char *) tensor_data(src0) + i01*nb01 + i02*nb02 + i03*nb03);
                             for (int i00 = 0; i00 < ne00; i00++) {
                                 dst_ptr[id] = GGML_FP32_TO_FP16(GGML_BF16_TO_FP32(src0_ptr[i00]));
                                 id++;
@@ -3466,13 +3466,13 @@ static void ggml_compute_forward_dup_bf16(
                 }
             } else if (dst->type == GGML_TYPE_F32) {
                 size_t id = 0;
-                float * dst_ptr = (float *) dst->data;
+                float * dst_ptr = (float *) tensor_data(dst);
 
                 for (int i03 = 0; i03 < ne03; i03++) {
                     for (int i02 = 0; i02 < ne02; i02++) {
                         id += ne00 * ir0;
                         for (int i01 = ir0; i01 < ir1; i01++) {
-                            const ggml_bf16_t * src0_ptr = (ggml_bf16_t *) ((char *) src0->data + i01*nb01 + i02*nb02 + i03*nb03);
+                            const ggml_bf16_t * src0_ptr = (ggml_bf16_t *) ((char *) tensor_data(src0) + i01*nb01 + i02*nb02 + i03*nb03);
                             for (int i00 = 0; i00 < ne00; i00++) {
                                 dst_ptr[id] = GGML_BF16_TO_FP32(src0_ptr[i00]);
                                 id++;
@@ -3487,13 +3487,13 @@ static void ggml_compute_forward_dup_bf16(
 
                 size_t id = 0;
                 size_t rs = nb0 * (ne00 / ggml_blck_size(dst->type));
-                char * dst_ptr = (char *) dst->data;
+                char * dst_ptr = (char *) tensor_data(dst);
 
                 for (int i03 = 0; i03 < ne03; i03++) {
                     for (int i02 = 0; i02 < ne02; i02++) {
                         id += rs * ir0;
                         for (int i01 = ir0; i01 < ir1; i01++) {
-                            const ggml_bf16_t * src0_ptr = (ggml_bf16_t *) ((char *) src0->data + i01*nb01 + i02*nb02 + i03*nb03);
+                            const ggml_bf16_t * src0_ptr = (ggml_bf16_t *) ((char *) tensor_data(src0) + i01*nb01 + i02*nb02 + i03*nb03);
 
                             for (int i00 = 0; i00 < ne00; i00++) {
                                 src0_f32[i00] = GGML_BF16_TO_FP32(src0_ptr[i00]);
@@ -3513,14 +3513,14 @@ static void ggml_compute_forward_dup_bf16(
 
             if (dst->type == GGML_TYPE_F32) {
                 size_t id = 0;
-                float * dst_ptr = (float *) dst->data;
+                float * dst_ptr = (float *) tensor_data(dst);
 
                 for (int i03 = 0; i03 < ne03; i03++) {
                     for (int i02 = 0; i02 < ne02; i02++) {
                         id += ne00 * ir0;
                         for (int i01 = ir0; i01 < ir1; i01++) {
                             for (int i00 = 0; i00 < ne00; i00++) {
-                                const ggml_bf16_t * src0_ptr = (ggml_bf16_t *) ((char *) src0->data + i00*nb00 + i01*nb01 + i02*nb02 + i03*nb03);
+                                const ggml_bf16_t * src0_ptr = (ggml_bf16_t *) ((char *) tensor_data(src0) + i00*nb00 + i01*nb01 + i02*nb02 + i03*nb03);
 
                                 dst_ptr[id] = GGML_BF16_TO_FP32(*src0_ptr);
                                 id++;
@@ -3531,14 +3531,14 @@ static void ggml_compute_forward_dup_bf16(
                 }
             } else if (dst->type == GGML_TYPE_BF16) {
                 size_t id = 0;
-                ggml_bf16_t * dst_ptr = (ggml_bf16_t *) dst->data;
+                ggml_bf16_t * dst_ptr = (ggml_bf16_t *) tensor_data(dst);
 
                 for (int i03 = 0; i03 < ne03; i03++) {
                     for (int i02 = 0; i02 < ne02; i02++) {
                         id += ne00 * ir0;
                         for (int i01 = ir0; i01 < ir1; i01++) {
                             for (int i00 = 0; i00 < ne00; i00++) {
-                                const ggml_bf16_t * src0_ptr = (ggml_bf16_t *) ((char *) src0->data + i00*nb00 + i01*nb01 + i02*nb02 + i03*nb03);
+                                const ggml_bf16_t * src0_ptr = (ggml_bf16_t *) ((char *) tensor_data(src0) + i00*nb00 + i01*nb01 + i02*nb02 + i03*nb03);
 
                                 dst_ptr[id] = *src0_ptr;
                                 id++;
@@ -3549,14 +3549,14 @@ static void ggml_compute_forward_dup_bf16(
                 }
             } else if (dst->type == GGML_TYPE_F16) {
                 size_t id = 0;
-                ggml_fp16_t * dst_ptr = (ggml_fp16_t *) dst->data;
+                ggml_fp16_t * dst_ptr = (ggml_fp16_t *) tensor_data(dst);
 
                 for (int i03 = 0; i03 < ne03; i03++) {
                     for (int i02 = 0; i02 < ne02; i02++) {
                         id += ne00 * ir0;
                         for (int i01 = ir0; i01 < ir1; i01++) {
                             for (int i00 = 0; i00 < ne00; i00++) {
-                                const ggml_bf16_t * src0_ptr = (ggml_bf16_t *) ((char *) src0->data + i00*nb00 + i01*nb01 + i02*nb02 + i03*nb03);
+                                const ggml_bf16_t * src0_ptr = (ggml_bf16_t *) ((char *) tensor_data(src0) + i00*nb00 + i01*nb01 + i02*nb02 + i03*nb03);
 
                                 dst_ptr[id] = GGML_FP32_TO_FP16(GGML_BF16_TO_FP32(*src0_ptr));
                                 id++;
@@ -3596,8 +3596,8 @@ static void ggml_compute_forward_dup_bf16(
                 }
                 for (int64_t i01 = ir0; i01 < ir1; i01++) {
                     for (int64_t i00 = 0; i00 < ne00; i00++) {
-                        const char * src0_ptr = ((char *) src0->data + i00*nb00 + i01*nb01 + i02*nb02 + i03*nb03);
-                              char * dst_ptr  = ((char *)  dst->data + i10*nb0  + i11*nb1  + i12*nb2  + i13*nb3);
+                        const char * src0_ptr = ((char *) tensor_data(src0) + i00*nb00 + i01*nb01 + i02*nb02 + i03*nb03);
+                              char * dst_ptr  = ((char *)  tensor_data(dst) + i10*nb0  + i11*nb1  + i12*nb2  + i13*nb3);
 
                         memcpy(dst_ptr, src0_ptr, sizeof(ggml_bf16_t));
 
@@ -3648,8 +3648,8 @@ static void ggml_compute_forward_dup_bf16(
                 }
                 for (int64_t i01 = ir0; i01 < ir1; i01++) {
                     for (int64_t i00 = 0; i00 < ne00; i00++) {
-                        const char * src0_ptr = ((char *) src0->data + i00*nb00 + i01*nb01 + i02*nb02 + i03*nb03);
-                              char * dst_ptr  = ((char *)  dst->data + i10*nb0  + i11*nb1  + i12*nb2  + i13*nb3);
+                        const char * src0_ptr = ((char *) tensor_data(src0) + i00*nb00 + i01*nb01 + i02*nb02 + i03*nb03);
+                              char * dst_ptr  = ((char *)  tensor_data(dst) + i10*nb0  + i11*nb1  + i12*nb2  + i13*nb3);
 
                         *(ggml_fp16_t *) dst_ptr = GGML_FP32_TO_FP16(GGML_BF16_TO_FP32(*(const ggml_bf16_t *) src0_ptr));
 
@@ -3700,8 +3700,8 @@ static void ggml_compute_forward_dup_bf16(
                 }
                 for (int64_t i01 = ir0; i01 < ir1; i01++) {
                     for (int64_t i00 = 0; i00 < ne00; i00++) {
-                        const char * src0_ptr = ((char *) src0->data + i00*nb00 + i01*nb01 + i02*nb02 + i03*nb03);
-                              char * dst_ptr  = ((char *)  dst->data + i10*nb0  + i11*nb1  + i12*nb2  + i13*nb3);
+                        const char * src0_ptr = ((char *) tensor_data(src0) + i00*nb00 + i01*nb01 + i02*nb02 + i03*nb03);
+                              char * dst_ptr  = ((char *)  tensor_data(dst) + i10*nb0  + i11*nb1  + i12*nb2  + i13*nb3);
 
                         *(float *) dst_ptr = GGML_BF16_TO_FP32(*(const ggml_bf16_t *) src0_ptr);
 
@@ -3769,8 +3769,8 @@ static void ggml_compute_forward_dup_f32(
             for (int64_t i02 = 0; i02 < ne02; i02++) {
                 for (int64_t i01 = ir0; i01 < ir1; i01++) {
                     memcpy(
-                        ((char *)  dst->data + i01*nb1  + i02*nb2  + i03*nb3),
-                        ((char *) src0->data + i01*nb01 + i02*nb02 + i03*nb03),
+                        ((char *)  tensor_data(dst) + i01*nb1  + i02*nb2  + i03*nb3),
+                        ((char *) tensor_data(src0) + i01*nb01 + i02*nb02 + i03*nb03),
                         rs);
                 }
             }
@@ -3784,13 +3784,13 @@ static void ggml_compute_forward_dup_f32(
             if (dst->type == GGML_TYPE_F32) {
                 size_t id = 0;
                 const size_t rs = ne00 * nb00;
-                char * dst_ptr = (char *) dst->data;
+                char * dst_ptr = (char *) tensor_data(dst);
 
                 for (int i03 = 0; i03 < ne03; i03++) {
                     for (int i02 = 0; i02 < ne02; i02++) {
                         id += rs * ir0;
                         for (int i01 = ir0; i01 < ir1; i01++) {
-                            const char * src0_ptr = (char *) src0->data + i01*nb01 + i02*nb02 + i03*nb03;
+                            const char * src0_ptr = (char *) tensor_data(src0) + i01*nb01 + i02*nb02 + i03*nb03;
                             memcpy(dst_ptr + id, src0_ptr, rs);
                             id += rs;
                         }
@@ -3802,13 +3802,13 @@ static void ggml_compute_forward_dup_f32(
 
                 size_t id = 0;
                 size_t rs = nb0 * (ne00 / ggml_blck_size(dst->type));
-                char * dst_ptr = (char *) dst->data;
+                char * dst_ptr = (char *) tensor_data(dst);
 
                 for (int i03 = 0; i03 < ne03; i03++) {
                     for (int i02 = 0; i02 < ne02; i02++) {
                         id += rs * ir0;
                         for (int i01 = ir0; i01 < ir1; i01++) {
-                            const float * src0_ptr = (float *) ((char *) src0->data + i01*nb01 + i02*nb02 + i03*nb03);
+                            const float * src0_ptr = (float *) ((char *) tensor_data(src0) + i01*nb01 + i02*nb02 + i03*nb03);
                             quantize_row_q(src0_ptr, dst_ptr + id, ne00);
                             id += rs;
                         }
@@ -3823,14 +3823,14 @@ static void ggml_compute_forward_dup_f32(
 
             if (dst->type == GGML_TYPE_F32) {
                 size_t id = 0;
-                float * dst_ptr = (float *) dst->data;
+                float * dst_ptr = (float *) tensor_data(dst);
 
                 for (int i03 = 0; i03 < ne03; i03++) {
                     for (int i02 = 0; i02 < ne02; i02++) {
                         id += ne00 * ir0;
                         for (int i01 = ir0; i01 < ir1; i01++) {
                             for (int i00 = 0; i00 < ne00; i00++) {
-                                const float * src0_ptr = (float *) ((char *) src0->data + i00*nb00 + i01*nb01 + i02*nb02 + i03*nb03);
+                                const float * src0_ptr = (float *) ((char *) tensor_data(src0) + i00*nb00 + i01*nb01 + i02*nb02 + i03*nb03);
 
                                 dst_ptr[id] = *src0_ptr;
                                 id++;
@@ -3841,14 +3841,14 @@ static void ggml_compute_forward_dup_f32(
                 }
             } else if (dst->type == GGML_TYPE_F16) {
                 size_t id = 0;
-                ggml_fp16_t * dst_ptr = (ggml_fp16_t *) dst->data;
+                ggml_fp16_t * dst_ptr = (ggml_fp16_t *) tensor_data(dst);
 
                 for (int i03 = 0; i03 < ne03; i03++) {
                     for (int i02 = 0; i02 < ne02; i02++) {
                         id += ne00 * ir0;
                         for (int i01 = ir0; i01 < ir1; i01++) {
                             for (int i00 = 0; i00 < ne00; i00++) {
-                                const float * src0_ptr = (float *) ((char *) src0->data + i00*nb00 + i01*nb01 + i02*nb02 + i03*nb03);
+                                const float * src0_ptr = (float *) ((char *) tensor_data(src0) + i00*nb00 + i01*nb01 + i02*nb02 + i03*nb03);
 
                                 dst_ptr[id] = GGML_FP32_TO_FP16(*src0_ptr);
                                 id++;
@@ -3859,14 +3859,14 @@ static void ggml_compute_forward_dup_f32(
                 }
             } else if (dst->type == GGML_TYPE_BF16) {
                 size_t id = 0;
-                ggml_bf16_t * dst_ptr = (ggml_bf16_t *) dst->data;
+                ggml_bf16_t * dst_ptr = (ggml_bf16_t *) tensor_data(dst);
 
                 for (int i03 = 0; i03 < ne03; i03++) {
                     for (int i02 = 0; i02 < ne02; i02++) {
                         id += ne00 * ir0;
                         for (int i01 = ir0; i01 < ir1; i01++) {
                             for (int i00 = 0; i00 < ne00; i00++) {
-                                const float * src0_ptr = (float *) ((char *) src0->data + i00*nb00 + i01*nb01 + i02*nb02 + i03*nb03);
+                                const float * src0_ptr = (float *) ((char *) tensor_data(src0) + i00*nb00 + i01*nb01 + i02*nb02 + i03*nb03);
 
                                 dst_ptr[id] = GGML_FP32_TO_BF16(*src0_ptr);
                                 id++;
@@ -3908,8 +3908,8 @@ static void ggml_compute_forward_dup_f32(
                 }
                 for (int64_t i01 = ir0; i01 < ir1; i01++) {
                     for (int64_t i00 = 0; i00 < ne00; i00++) {
-                        const char * src0_ptr = ((char *) src0->data + i00*nb00 + i01*nb01 + i02*nb02 + i03*nb03);
-                              char * dst_ptr  = ((char *)  dst->data + i10*nb0  + i11*nb1  + i12*nb2  + i13*nb3);
+                        const char * src0_ptr = ((char *) tensor_data(src0) + i00*nb00 + i01*nb01 + i02*nb02 + i03*nb03);
+                              char * dst_ptr  = ((char *)  tensor_data(dst) + i10*nb0  + i11*nb1  + i12*nb2  + i13*nb3);
 
                         memcpy(dst_ptr, src0_ptr, sizeof(float));
 
@@ -3960,8 +3960,8 @@ static void ggml_compute_forward_dup_f32(
                 }
                 for (int64_t i01 = ir0; i01 < ir1; i01++) {
                     for (int64_t i00 = 0; i00 < ne00; i00++) {
-                        const char * src0_ptr = ((char *) src0->data + i00*nb00 + i01*nb01 + i02*nb02 + i03*nb03);
-                              char * dst_ptr  = ((char *)  dst->data + i10*nb0  + i11*nb1  + i12*nb2  + i13*nb3);
+                        const char * src0_ptr = ((char *) tensor_data(src0) + i00*nb00 + i01*nb01 + i02*nb02 + i03*nb03);
+                              char * dst_ptr  = ((char *)  tensor_data(dst) + i10*nb0  + i11*nb1  + i12*nb2  + i13*nb3);
 
                         *(ggml_fp16_t *) dst_ptr = GGML_FP32_TO_FP16(*(const float *) src0_ptr);
 
@@ -4012,8 +4012,8 @@ static void ggml_compute_forward_dup_f32(
                 }
                 for (int64_t i01 = ir0; i01 < ir1; i01++) {
                     for (int64_t i00 = 0; i00 < ne00; i00++) {
-                        const char * src0_ptr = ((char *) src0->data + i00*nb00 + i01*nb01 + i02*nb02 + i03*nb03);
-                              char * dst_ptr  = ((char *)  dst->data + i10*nb0  + i11*nb1  + i12*nb2  + i13*nb3);
+                        const char * src0_ptr = ((char *) tensor_data(src0) + i00*nb00 + i01*nb01 + i02*nb02 + i03*nb03);
+                              char * dst_ptr  = ((char *)  tensor_data(dst) + i10*nb0  + i11*nb1  + i12*nb2  + i13*nb3);
 
                         *(ggml_bf16_t *) dst_ptr = GGML_FP32_TO_BF16(*(const float *) src0_ptr);
 
@@ -4090,8 +4090,8 @@ static void ggml_compute_forward_dup_bytes(
             for (int64_t i02 = 0; i02 < ne02; i02++) {
                 for (int64_t i01 = ir0; i01 < ir1; i01++) {
                     memcpy(
-                        ((char *)  dst->data + i01*nb1  + i02*nb2  + i03*nb3),
-                        ((char *) src0->data + i01*nb01 + i02*nb02 + i03*nb03),
+                        ((char *)  tensor_data(dst) + i01*nb1  + i02*nb2  + i03*nb3),
+                        ((char *) tensor_data(src0) + i01*nb01 + i02*nb02 + i03*nb03),
                         rs);
                 }
             }
@@ -4101,7 +4101,7 @@ static void ggml_compute_forward_dup_bytes(
 
     if (ggml_is_contiguous(dst)) {
         size_t id = 0;
-        char * dst_ptr = (char *) dst->data;
+        char * dst_ptr = (char *) tensor_data(dst);
         const size_t rs = ne00 * type_size;
 
         if (nb00 == type_size) {
@@ -4110,7 +4110,7 @@ static void ggml_compute_forward_dup_bytes(
                 for (int64_t i02 = 0; i02 < ne02; i02++) {
                     id += rs * ir0;
                     for (int64_t i01 = ir0; i01 < ir1; i01++) {
-                        const char * src0_ptr = (char *) src0->data + i01*nb01 + i02*nb02 + i03*nb03;
+                        const char * src0_ptr = (char *) tensor_data(src0) + i01*nb01 + i02*nb02 + i03*nb03;
                         memcpy(dst_ptr + id, src0_ptr, rs);
                         id += rs;
                     }
@@ -4125,7 +4125,7 @@ static void ggml_compute_forward_dup_bytes(
                     id += rs * ir0;
                     for (int64_t i01 = ir0; i01 < ir1; i01++) {
                         for (int64_t i00 = 0; i00 < ne00; i00++) {
-                            const char * src0_ptr = (char *) src0->data + i00*nb00 + i01*nb01 + i02*nb02 + i03*nb03;
+                            const char * src0_ptr = (char *) tensor_data(src0) + i00*nb00 + i01*nb01 + i02*nb02 + i03*nb03;
                             memcpy(dst_ptr + id, src0_ptr, type_size);
 
                             id += type_size;
@@ -4163,8 +4163,8 @@ static void ggml_compute_forward_dup_bytes(
             }
             for (int64_t i01 = ir0; i01 < ir1; i01++) {
                 for (int64_t i00 = 0; i00 < ne00; i00++) {
-                    const char * src0_ptr = ((char *) src0->data + i00*nb00 + i01*nb01 + i02*nb02 + i03*nb03);
-                          char * dst_ptr  = ((char *)  dst->data + i10*nb0  + i11*nb1  + i12*nb2  + i13*nb3);
+                    const char * src0_ptr = ((char *) tensor_data(src0) + i00*nb00 + i01*nb01 + i02*nb02 + i03*nb03);
+                          char * dst_ptr  = ((char *)  tensor_data(dst) + i10*nb0  + i11*nb1  + i12*nb2  + i13*nb3);
 
                     memcpy(dst_ptr, src0_ptr, type_size);
 
@@ -4245,8 +4245,8 @@ static void ggml_compute_forward_dup_q(
         const int64_t dst_offset = i10*nb10 + i11*nb11 + i12*nb12 + i13*nb13;
 
         dequantize_row_q(
-                (const void *) ((char *) src0->data + x_offset),
-                     (float *) ((char *)  dst->data + dst_offset), qk);
+                (const void *) ((char *) tensor_data(src0) + x_offset),
+                     (float *) ((char *)  tensor_data(dst) + dst_offset), qk);
     }
 }
 
@@ -4325,9 +4325,9 @@ static void ggml_compute_forward_add_f32(
             const int64_t i11 = i01 % ne11;
             const int64_t nr0 = ne00 / ne10;
 
-            float * dst_ptr  = (float *) ((char *) dst->data  + i03*nb3  + i02*nb2  + i01*nb1 );
-            float * src0_ptr = (float *) ((char *) src0->data + i03*nb03 + i02*nb02 + i01*nb01);
-            float * src1_ptr = (float *) ((char *) src1->data + i13*nb13 + i12*nb12 + i11*nb11);
+            float * dst_ptr  = (float *) ((char *) tensor_data(dst)  + i03*nb3  + i02*nb2  + i01*nb1 );
+            float * src0_ptr = (float *) ((char *) tensor_data(src0) + i03*nb03 + i02*nb02 + i01*nb01);
+            float * src1_ptr = (float *) ((char *) tensor_data(src1) + i13*nb13 + i12*nb12 + i11*nb11);
 
             for (int64_t r = 0; r < nr0; ++r) {
 #ifdef GGML_USE_ACCELERATE
@@ -4349,12 +4349,12 @@ static void ggml_compute_forward_add_f32(
             const int64_t i12 = i02 % ne12;
             const int64_t i11 = i01 % ne11;
 
-            float * dst_ptr  = (float *) ((char *) dst->data  + i03*nb3  + i02*nb2  + i01*nb1 );
-            float * src0_ptr = (float *) ((char *) src0->data + i03*nb03 + i02*nb02 + i01*nb01);
+            float * dst_ptr  = (float *) ((char *) tensor_data(dst)  + i03*nb3  + i02*nb2  + i01*nb1 );
+            float * src0_ptr = (float *) ((char *) tensor_data(src0) + i03*nb03 + i02*nb02 + i01*nb01);
 
             for (int64_t i0 = 0; i0 < ne0; ++i0) {
                 const int64_t i10 = i0 % ne10;
-                float * src1_ptr = (float *) ((char *) src1->data + i13*nb13 + i12*nb12 + i11*nb11 + i10*nb10);
+                float * src1_ptr = (float *) ((char *) tensor_data(src1) + i13*nb13 + i12*nb12 + i11*nb11 + i10*nb10);
 
                 dst_ptr[i0] = src0_ptr[i0] + *src1_ptr;
             }
@@ -4406,9 +4406,9 @@ static void ggml_compute_forward_add_f16_f32(
                 const int i2 = (ir - i3*ne2*ne1)/ne1;
                 const int i1 = (ir - i3*ne2*ne1 - i2*ne1);
 
-                ggml_fp16_t * dst_ptr  = (ggml_fp16_t *) ((char *) dst->data  + i3*nb3  + i2*nb2  + i1*nb1);
-                ggml_fp16_t * src0_ptr = (ggml_fp16_t *) ((char *) src0->data + i3*nb03 + i2*nb02 + i1*nb01);
-                float *       src1_ptr = (float *)       ((char *) src1->data + i3*nb13 + i2*nb12 + i1*nb11);
+                ggml_fp16_t * dst_ptr  = (ggml_fp16_t *) ((char *) tensor_data(dst)  + i3*nb3  + i2*nb2  + i1*nb1);
+                ggml_fp16_t * src0_ptr = (ggml_fp16_t *) ((char *) tensor_data(src0) + i3*nb03 + i2*nb02 + i1*nb01);
+                float *       src1_ptr = (float *)       ((char *) tensor_data(src1) + i3*nb13 + i2*nb12 + i1*nb11);
 
                 for (int i = 0; i < ne0; i++) {
                     dst_ptr[i] = GGML_FP32_TO_FP16(GGML_FP16_TO_FP32(src0_ptr[i]) + src1_ptr[i]);
@@ -4421,9 +4421,9 @@ static void ggml_compute_forward_add_f16_f32(
                 const int i2 = (ir - i3*ne2*ne1)/ne1;
                 const int i1 = (ir - i3*ne2*ne1 - i2*ne1);
 
-                float *       dst_ptr  = (float *)       ((char *) dst->data  + i3*nb3  + i2*nb2  + i1*nb1);
-                ggml_fp16_t * src0_ptr = (ggml_fp16_t *) ((char *) src0->data + i3*nb03 + i2*nb02 + i1*nb01);
-                float *       src1_ptr = (float *)       ((char *) src1->data + i3*nb13 + i2*nb12 + i1*nb11);
+                float *       dst_ptr  = (float *)       ((char *) tensor_data(dst)  + i3*nb3  + i2*nb2  + i1*nb1);
+                ggml_fp16_t * src0_ptr = (ggml_fp16_t *) ((char *) tensor_data(src0) + i3*nb03 + i2*nb02 + i1*nb01);
+                float *       src1_ptr = (float *)       ((char *) tensor_data(src1) + i3*nb13 + i2*nb12 + i1*nb11);
 
                 for (int i = 0; i < ne0; i++) {
                     dst_ptr[i] = GGML_FP16_TO_FP32(src0_ptr[i]) + src1_ptr[i];
@@ -4481,9 +4481,9 @@ static void ggml_compute_forward_add_bf16_f32(
                 const int i2 = (ir - i3*ne2*ne1)/ne1;
                 const int i1 = (ir - i3*ne2*ne1 - i2*ne1);
 
-                ggml_bf16_t * dst_ptr  = (ggml_bf16_t *) ((char *) dst->data  + i3*nb3  + i2*nb2  + i1*nb1);
-                ggml_bf16_t * src0_ptr = (ggml_bf16_t *) ((char *) src0->data + i3*nb03 + i2*nb02 + i1*nb01);
-                float *       src1_ptr = (float *)       ((char *) src1->data + i3*nb13 + i2*nb12 + i1*nb11);
+                ggml_bf16_t * dst_ptr  = (ggml_bf16_t *) ((char *) tensor_data(dst)  + i3*nb3  + i2*nb2  + i1*nb1);
+                ggml_bf16_t * src0_ptr = (ggml_bf16_t *) ((char *) tensor_data(src0) + i3*nb03 + i2*nb02 + i1*nb01);
+                float *       src1_ptr = (float *)       ((char *) tensor_data(src1) + i3*nb13 + i2*nb12 + i1*nb11);
 
                 for (int i = 0; i < ne0; i++) {
                     dst_ptr[i] = GGML_FP32_TO_BF16(GGML_BF16_TO_FP32(src0_ptr[i]) + src1_ptr[i]);
@@ -4496,9 +4496,9 @@ static void ggml_compute_forward_add_bf16_f32(
                 const int i2 = (ir - i3*ne2*ne1)/ne1;
                 const int i1 = (ir - i3*ne2*ne1 - i2*ne1);
 
-                float *       dst_ptr  = (float *)       ((char *) dst->data  + i3*nb3  + i2*nb2  + i1*nb1);
-                ggml_bf16_t * src0_ptr = (ggml_bf16_t *) ((char *) src0->data + i3*nb03 + i2*nb02 + i1*nb01);
-                float *       src1_ptr = (float *)       ((char *) src1->data + i3*nb13 + i2*nb12 + i1*nb11);
+                float *       dst_ptr  = (float *)       ((char *) tensor_data(dst)  + i3*nb3  + i2*nb2  + i1*nb1);
+                ggml_bf16_t * src0_ptr = (ggml_bf16_t *) ((char *) tensor_data(src0) + i3*nb03 + i2*nb02 + i1*nb01);
+                float *       src1_ptr = (float *)       ((char *) tensor_data(src1) + i3*nb13 + i2*nb12 + i1*nb11);
 
                 for (int i = 0; i < ne0; i++) {
                     dst_ptr[i] = GGML_BF16_TO_FP32(src0_ptr[i]) + src1_ptr[i];
@@ -4554,9 +4554,9 @@ static void ggml_compute_forward_add_f16_f16(
             const int64_t i11 = i01 % ne11;
             const int64_t nr0 = ne00 / ne10;
 
-            ggml_fp16_t * dst_ptr  = (ggml_fp16_t *) ((char *) dst->data  + i03*nb3  + i02*nb2  + i01*nb1 );
-            ggml_fp16_t * src0_ptr = (ggml_fp16_t *) ((char *) src0->data + i03*nb03 + i02*nb02 + i01*nb01);
-            ggml_fp16_t * src1_ptr = (ggml_fp16_t *) ((char *) src1->data + i13*nb13 + i12*nb12 + i11*nb11);
+            ggml_fp16_t * dst_ptr  = (ggml_fp16_t *) ((char *) tensor_data(dst)  + i03*nb3  + i02*nb2  + i01*nb1 );
+            ggml_fp16_t * src0_ptr = (ggml_fp16_t *) ((char *) tensor_data(src0) + i03*nb03 + i02*nb02 + i01*nb01);
+            ggml_fp16_t * src1_ptr = (ggml_fp16_t *) ((char *) tensor_data(src1) + i13*nb13 + i12*nb12 + i11*nb11);
 
             for (int64_t r = 0; r < nr0; ++r) {
                 ggml_vec_add_f16(ne10, dst_ptr + r*ne10, src0_ptr + r*ne10, src1_ptr);
@@ -4606,9 +4606,9 @@ static void ggml_compute_forward_add_bf16_bf16(
             const int i2 = (ir - i3*ne2*ne1)/ne1;
             const int i1 = (ir - i3*ne2*ne1 - i2*ne1);
 
-            ggml_bf16_t * dst_ptr  = (ggml_bf16_t *) ((char *) dst->data  + i3*nb3  + i2*nb2  + i1*nb1);
-            ggml_bf16_t * src0_ptr = (ggml_bf16_t *) ((char *) src0->data + i3*nb03 + i2*nb02 + i1*nb01);
-            ggml_bf16_t * src1_ptr = (ggml_bf16_t *) ((char *) src1->data + i3*nb13 + i2*nb12 + i1*nb11);
+            ggml_bf16_t * dst_ptr  = (ggml_bf16_t *) ((char *) tensor_data(dst)  + i3*nb3  + i2*nb2  + i1*nb1);
+            ggml_bf16_t * src0_ptr = (ggml_bf16_t *) ((char *) tensor_data(src0) + i3*nb03 + i2*nb02 + i1*nb01);
+            ggml_bf16_t * src1_ptr = (ggml_bf16_t *) ((char *) tensor_data(src1) + i3*nb13 + i2*nb12 + i1*nb11);
 
             for (int i = 0; i < ne0; i++) {
                 dst_ptr[i] = GGML_FP32_TO_BF16(GGML_BF16_TO_FP32(src0_ptr[i]) + GGML_BF16_TO_FP32(src1_ptr[i]));
@@ -4678,9 +4678,9 @@ static void ggml_compute_forward_add_q_f32(
         const int i2 = i02;
         const int i1 = i01;
 
-        void  * src0_row = (void *) ((char *) src0->data + (i01*nb01 + i02*nb02 + i03*nb03));
-        float * src1_row = (float *)((char *) src1->data + (i11*nb11 + i12*nb12 + i13*nb13));
-        void  * dst_row  = (void *) ((char *)  dst->data + ( i1*nb1  +  i2*nb2  +  i3*nb3));
+        void  * src0_row = (void *) ((char *) tensor_data(src0) + (i01*nb01 + i02*nb02 + i03*nb03));
+        float * src1_row = (float *)((char *) tensor_data(src1) + (i11*nb11 + i12*nb12 + i13*nb13));
+        void  * dst_row  = (void *) ((char *)  tensor_data(dst) + ( i1*nb1  +  i2*nb2  +  i3*nb3));
 
         assert(ne00 % 32 == 0);
 
@@ -4808,15 +4808,15 @@ static void ggml_compute_forward_add1_f32(
         UNUSED(ggml_vec_add1_f32);
 
         vDSP_vadd(
-                (float *) ((char *) src0->data + i3*nb03 + i2*nb02 + i1*nb01), 1,
-                (float *) ((char *) src1->data), 0,
-                (float *) ((char *) dst->data  + i3*nb3  + i2*nb2  + i1*nb1 ), 1,
+                (float *) ((char *) tensor_data(src0) + i3*nb03 + i2*nb02 + i1*nb01), 1,
+                (float *) ((char *) tensor_data(src1)), 0,
+                (float *) ((char *) tensor_data(dst)  + i3*nb3  + i2*nb2  + i1*nb1 ), 1,
                 ne0);
 #else
         ggml_vec_add1_f32(ne0,
-                (float *) ((char *) dst->data  + i3*nb3  + i2*nb2  + i1*nb1 ),
-                (float *) ((char *) src0->data + i3*nb03 + i2*nb02 + i1*nb01),
-               *(float *) src1->data);
+                (float *) ((char *) tensor_data(dst)  + i3*nb3  + i2*nb2  + i1*nb1 ),
+                (float *) ((char *) tensor_data(src0) + i3*nb03 + i2*nb02 + i1*nb01),
+               *(float *) tensor_data(src1));
 #endif
     }
 }
@@ -4832,7 +4832,7 @@ static void ggml_compute_forward_add1_f16_f32(
     GGML_ASSERT(ggml_is_scalar(src1));
 
     // scalar to add
-    const float v = *(float *) src1->data;
+    const float v = *(float *) tensor_data(src1);
 
     const int ith = params->ith;
     const int nth = params->nth;
@@ -4861,8 +4861,8 @@ static void ggml_compute_forward_add1_f16_f32(
         const int i2 = (ir - i3*ne2*ne1)/ne1;
         const int i1 = (ir - i3*ne2*ne1 - i2*ne1);
 
-        ggml_fp16_t * dst_ptr  = (ggml_fp16_t *) ((char *) dst->data  + i3*nb3  + i2*nb2  + i1*nb1 );
-        ggml_fp16_t * src0_ptr = (ggml_fp16_t *) ((char *) src0->data + i3*nb03 + i2*nb02 + i1*nb01);
+        ggml_fp16_t * dst_ptr  = (ggml_fp16_t *) ((char *) tensor_data(dst)  + i3*nb3  + i2*nb2  + i1*nb1 );
+        ggml_fp16_t * src0_ptr = (ggml_fp16_t *) ((char *) tensor_data(src0) + i3*nb03 + i2*nb02 + i1*nb01);
         for (int i = 0; i < ne0; i++) {
             dst_ptr[i] = GGML_FP32_TO_FP16(GGML_FP16_TO_FP32(src0_ptr[i]) + v);
         }
@@ -4880,7 +4880,7 @@ static void ggml_compute_forward_add1_f16_f16(
     GGML_ASSERT(ggml_is_scalar(src1));
 
     // scalar to add
-    const float v = GGML_FP16_TO_FP32(*(ggml_fp16_t *) src1->data);
+    const float v = GGML_FP16_TO_FP32(*(ggml_fp16_t *) tensor_data(src1));
 
     const int ith = params->ith;
     const int nth = params->nth;
@@ -4909,8 +4909,8 @@ static void ggml_compute_forward_add1_f16_f16(
         const int i2 = (ir - i3*ne2*ne1)/ne1;
         const int i1 = (ir - i3*ne2*ne1 - i2*ne1);
 
-        ggml_fp16_t * dst_ptr  = (ggml_fp16_t *) ((char *) dst->data  + i3*nb3  + i2*nb2  + i1*nb1 );
-        ggml_fp16_t * src0_ptr = (ggml_fp16_t *) ((char *) src0->data + i3*nb03 + i2*nb02 + i1*nb01);
+        ggml_fp16_t * dst_ptr  = (ggml_fp16_t *) ((char *) tensor_data(dst)  + i3*nb3  + i2*nb2  + i1*nb1 );
+        ggml_fp16_t * src0_ptr = (ggml_fp16_t *) ((char *) tensor_data(src0) + i3*nb03 + i2*nb02 + i1*nb01);
         for (int i = 0; i < ne0; i++) {
             dst_ptr[i] = GGML_FP32_TO_FP16(GGML_FP16_TO_FP32(src0_ptr[i]) + v);
         }
@@ -4928,7 +4928,7 @@ static void ggml_compute_forward_add1_q_f32(
     GGML_ASSERT(ggml_is_scalar(src1));
 
     // scalar to add
-    const float v = *(float *) src1->data;
+    const float v = *(float *) tensor_data(src1);
 
     const int ith = params->ith;
     const int nth = params->nth;
@@ -4968,8 +4968,8 @@ static void ggml_compute_forward_add1_q_f32(
         const int i2 = (ir - i3*ne2*ne1)/ne1;
         const int i1 = (ir - i3*ne2*ne1 - i2*ne1);
 
-        void  * src0_row = (void *) ((char *) src0->data + (i1*nb01 + i2*nb02 + i3*nb03));
-        void  * dst_row  = (void *) ((char *)  dst->data + (i1*nb1  + i2*nb2  + i3*nb0 ));
+        void  * src0_row = (void *) ((char *) tensor_data(src0) + (i1*nb01 + i2*nb02 + i3*nb03));
+        void  * dst_row  = (void *) ((char *)  tensor_data(dst) + (i1*nb1  + i2*nb2  + i3*nb0 ));
 
         assert(ne0 % 32 == 0);
 
@@ -4993,7 +4993,7 @@ static void ggml_compute_forward_add1_bf16_f32(
     GGML_ASSERT(ggml_is_scalar(src1));
 
     // scalar to add
-    const float v = *(float *) src1->data;
+    const float v = *(float *) tensor_data(src1);
 
     const int ith = params->ith;
     const int nth = params->nth;
@@ -5022,8 +5022,8 @@ static void ggml_compute_forward_add1_bf16_f32(
         const int i2 = (ir - i3*ne2*ne1)/ne1;
         const int i1 = (ir - i3*ne2*ne1 - i2*ne1);
 
-        ggml_bf16_t * dst_ptr  = (ggml_bf16_t *) ((char *) dst->data  + i3*nb3  + i2*nb2  + i1*nb1 );
-        ggml_bf16_t * src0_ptr = (ggml_bf16_t *) ((char *) src0->data + i3*nb03 + i2*nb02 + i1*nb01);
+        ggml_bf16_t * dst_ptr  = (ggml_bf16_t *) ((char *) tensor_data(dst)  + i3*nb3  + i2*nb2  + i1*nb1 );
+        ggml_bf16_t * src0_ptr = (ggml_bf16_t *) ((char *) tensor_data(src0) + i3*nb03 + i2*nb02 + i1*nb01);
         for (int i = 0; i < ne0; i++) {
             dst_ptr[i] = GGML_FP32_TO_BF16(GGML_BF16_TO_FP32(src0_ptr[i]) + v);
         }
@@ -5041,7 +5041,7 @@ static void ggml_compute_forward_add1_bf16_bf16(
     GGML_ASSERT(ggml_is_scalar(src1));
 
     // scalar to add
-    const float v = GGML_BF16_TO_FP32(*(ggml_bf16_t *) src1->data);
+    const float v = GGML_BF16_TO_FP32(*(ggml_bf16_t *) tensor_data(src1));
 
     const int ith = params->ith;
     const int nth = params->nth;
@@ -5070,8 +5070,8 @@ static void ggml_compute_forward_add1_bf16_bf16(
         const int i2 = (ir - i3*ne2*ne1)/ne1;
         const int i1 = (ir - i3*ne2*ne1 - i2*ne1);
 
-        ggml_bf16_t * dst_ptr  = (ggml_bf16_t *) ((char *) dst->data  + i3*nb3  + i2*nb2  + i1*nb1 );
-        ggml_bf16_t * src0_ptr = (ggml_bf16_t *) ((char *) src0->data + i3*nb03 + i2*nb02 + i1*nb01);
+        ggml_bf16_t * dst_ptr  = (ggml_bf16_t *) ((char *) tensor_data(dst)  + i3*nb3  + i2*nb2  + i1*nb1 );
+        ggml_bf16_t * src0_ptr = (ggml_bf16_t *) ((char *) tensor_data(src0) + i3*nb03 + i2*nb02 + i1*nb01);
         for (int i = 0; i < ne0; i++) {
             dst_ptr[i] = GGML_FP32_TO_BF16(GGML_BF16_TO_FP32(src0_ptr[i]) + v);
         }
@@ -5171,8 +5171,8 @@ static void ggml_compute_forward_acc_f32(
             // memcpy needs to be synchronized across threads to avoid race conditions.
             // => do it in INIT phase
             memcpy(
-                ((char *)  dst->data),
-                ((char *) src0->data),
+                ((char *)  tensor_data(dst)),
+                ((char *) tensor_data(src0)),
                 ggml_nbytes(dst));
         }
         ggml_barrier(params->threadpool);
@@ -5216,14 +5216,14 @@ static void ggml_compute_forward_acc_f32(
 
 #ifdef GGML_USE_ACCELERATE
         vDSP_vadd(
-                (float *) ((char *) src0->data + i3*nb03 + i2*nb02 + i1*nb01 + offset), 1,
-                (float *) ((char *) src1->data + i3*nb13 + i2*nb12 + i1*nb11), 1,
-                (float *) ((char *) dst->data  + i3*nb3  + i2*nb2  + i1*nb1  + offset), 1, nc);
+                (float *) ((char *) tensor_data(src0) + i3*nb03 + i2*nb02 + i1*nb01 + offset), 1,
+                (float *) ((char *) tensor_data(src1) + i3*nb13 + i2*nb12 + i1*nb11), 1,
+                (float *) ((char *) tensor_data(dst)  + i3*nb3  + i2*nb2  + i1*nb1  + offset), 1, nc);
 #else
         ggml_vec_add_f32(nc,
-                (float *) ((char *)  dst->data + i3*nb3  + i2*nb2  + i1*nb1  + offset),
-                (float *) ((char *) src0->data + i3*nb03 + i2*nb02 + i1*nb01 + offset),
-                (float *) ((char *) src1->data + i3*nb13 + i2*nb12 + i1*nb11));
+                (float *) ((char *)  tensor_data(dst) + i3*nb3  + i2*nb2  + i1*nb1  + offset),
+                (float *) ((char *) tensor_data(src0) + i3*nb03 + i2*nb02 + i1*nb01 + offset),
+                (float *) ((char *) tensor_data(src1) + i3*nb13 + i2*nb12 + i1*nb11));
 #endif
     }
 }
@@ -5310,9 +5310,9 @@ static void ggml_compute_forward_sub_f32(
             const int64_t i11 = i01 % ne11;
             const int64_t nr0 = ne00 / ne10;
 
-            float * dst_ptr  = (float *) ((char *) dst->data  + i03*nb3  + i02*nb2  + i01*nb1 );
-            float * src0_ptr = (float *) ((char *) src0->data + i03*nb03 + i02*nb02 + i01*nb01);
-            float * src1_ptr = (float *) ((char *) src1->data + i13*nb13 + i12*nb12 + i11*nb11);
+            float * dst_ptr  = (float *) ((char *) tensor_data(dst)  + i03*nb3  + i02*nb2  + i01*nb1 );
+            float * src0_ptr = (float *) ((char *) tensor_data(src0) + i03*nb03 + i02*nb02 + i01*nb01);
+            float * src1_ptr = (float *) ((char *) tensor_data(src1) + i13*nb13 + i12*nb12 + i11*nb11);
 
             for (int64_t r = 0; r < nr0; ++r) {
 #ifdef GGML_USE_ACCELERATE
@@ -5334,12 +5334,12 @@ static void ggml_compute_forward_sub_f32(
             const int64_t i12 = i02 % ne12;
             const int64_t i11 = i01 % ne11;
 
-            float * dst_ptr  = (float *) ((char *) dst->data  + i03*nb3  + i02*nb2  + i01*nb1 );
-            float * src0_ptr = (float *) ((char *) src0->data + i03*nb03 + i02*nb02 + i01*nb01);
+            float * dst_ptr  = (float *) ((char *) tensor_data(dst)  + i03*nb3  + i02*nb2  + i01*nb1 );
+            float * src0_ptr = (float *) ((char *) tensor_data(src0) + i03*nb03 + i02*nb02 + i01*nb01);
 
             for (int64_t i0 = 0; i0 < ne0; ++i0) {
                 const int64_t i10 = i0 % ne10;
-                float * src1_ptr = (float *) ((char *) src1->data + i13*nb13 + i12*nb12 + i11*nb11 + i10*nb10);
+                float * src1_ptr = (float *) ((char *) tensor_data(src1) + i13*nb13 + i12*nb12 + i11*nb11 + i10*nb10);
 
                 dst_ptr[i0] = src0_ptr[i0] - *src1_ptr;
             }
@@ -5389,9 +5389,9 @@ static void ggml_compute_forward_sub_f16(
             const int64_t i11 = i01 % ne11;
             const int64_t nr0 = ne00 / ne10;
 
-            ggml_fp16_t * dst_ptr  = (ggml_fp16_t *) ((char *) dst->data  + i03*nb3  + i02*nb2  + i01*nb1 );
-            ggml_fp16_t * src0_ptr = (ggml_fp16_t *) ((char *) src0->data + i03*nb03 + i02*nb02 + i01*nb01);
-            ggml_fp16_t * src1_ptr = (ggml_fp16_t *) ((char *) src1->data + i13*nb13 + i12*nb12 + i11*nb11);
+            ggml_fp16_t * dst_ptr  = (ggml_fp16_t *) ((char *) tensor_data(dst)  + i03*nb3  + i02*nb2  + i01*nb1 );
+            ggml_fp16_t * src0_ptr = (ggml_fp16_t *) ((char *) tensor_data(src0) + i03*nb03 + i02*nb02 + i01*nb01);
+            ggml_fp16_t * src1_ptr = (ggml_fp16_t *) ((char *) tensor_data(src1) + i13*nb13 + i12*nb12 + i11*nb11);
 
             for (int64_t r = 0; r < nr0; ++r) {
                 ggml_vec_sub_f16(ne10, dst_ptr + r*ne10, src0_ptr + r*ne10, src1_ptr);
@@ -5458,9 +5458,9 @@ static void ggml_compute_forward_mul_f32(
             const int64_t i11 = i01 % ne11;
             const int64_t nr0 = ne00 / ne10;
 
-            float * dst_ptr  = (float *) ((char *) dst->data  + i03*nb3  + i02*nb2  + i01*nb1 );
-            float * src0_ptr = (float *) ((char *) src0->data + i03*nb03 + i02*nb02 + i01*nb01);
-            float * src1_ptr = (float *) ((char *) src1->data + i13*nb13 + i12*nb12 + i11*nb11);
+            float * dst_ptr  = (float *) ((char *) tensor_data(dst)  + i03*nb3  + i02*nb2  + i01*nb1 );
+            float * src0_ptr = (float *) ((char *) tensor_data(src0) + i03*nb03 + i02*nb02 + i01*nb01);
+            float * src1_ptr = (float *) ((char *) tensor_data(src1) + i13*nb13 + i12*nb12 + i11*nb11);
 
             for (int64_t r = 0 ; r < nr0; ++r) {
 #ifdef GGML_USE_ACCELERATE
@@ -5485,12 +5485,12 @@ static void ggml_compute_forward_mul_f32(
             const int64_t i12 = i02 % ne12;
             const int64_t i11 = i01 % ne11;
 
-            float * dst_ptr  = (float *) ((char *) dst->data  + i03*nb3  + i02*nb2  + i01*nb1 );
-            float * src0_ptr = (float *) ((char *) src0->data + i03*nb03 + i02*nb02 + i01*nb01);
+            float * dst_ptr  = (float *) ((char *) tensor_data(dst)  + i03*nb3  + i02*nb2  + i01*nb1 );
+            float * src0_ptr = (float *) ((char *) tensor_data(src0) + i03*nb03 + i02*nb02 + i01*nb01);
 
             for (int64_t i0 = 0; i0 < ne00; ++i0) {
                 const int64_t i10 = i0 % ne10;
-                float * src1_ptr = (float *) ((char *) src1->data + i13*nb13 + i12*nb12 + i11*nb11 + i10*nb10);
+                float * src1_ptr = (float *) ((char *) tensor_data(src1) + i13*nb13 + i12*nb12 + i11*nb11 + i10*nb10);
 
                 dst_ptr[i0] = src0_ptr[i0] * (*src1_ptr);
             }
@@ -5533,9 +5533,9 @@ static void ggml_compute_forward_mul_f16(
             const int64_t i11 = i01 % ne11;
             const int64_t nr0 = ne00 / ne10;
 
-            ggml_fp16_t * dst_ptr  = (ggml_fp16_t *) ((char *) dst->data  + i03*nb3  + i02*nb2  + i01*nb1 );
-            ggml_fp16_t * src0_ptr = (ggml_fp16_t *) ((char *) src0->data + i03*nb03 + i02*nb02 + i01*nb01);
-            ggml_fp16_t * src1_ptr = (ggml_fp16_t *) ((char *) src1->data + i13*nb13 + i12*nb12 + i11*nb11);
+            ggml_fp16_t * dst_ptr  = (ggml_fp16_t *) ((char *) tensor_data(dst)  + i03*nb3  + i02*nb2  + i01*nb1 );
+            ggml_fp16_t * src0_ptr = (ggml_fp16_t *) ((char *) tensor_data(src0) + i03*nb03 + i02*nb02 + i01*nb01);
+            ggml_fp16_t * src1_ptr = (ggml_fp16_t *) ((char *) tensor_data(src1) + i13*nb13 + i12*nb12 + i11*nb11);
 
             for (int64_t r = 0 ; r < nr0; ++r) {
                 ggml_vec_mul_f16(ne10, dst_ptr + r*ne10, src0_ptr + r*ne10, src1_ptr);
@@ -5605,9 +5605,9 @@ static void ggml_compute_forward_div_f32(
             const int64_t i11 = i01 % ne11;
             const int64_t nr0 = ne00 / ne10;
 
-            float * dst_ptr  = (float *) ((char *) dst->data  + i03*nb3  + i02*nb2  + i01*nb1 );
-            float * src0_ptr = (float *) ((char *) src0->data + i03*nb03 + i02*nb02 + i01*nb01);
-            float * src1_ptr = (float *) ((char *) src1->data + i13*nb13 + i12*nb12 + i11*nb11);
+            float * dst_ptr  = (float *) ((char *) tensor_data(dst)  + i03*nb3  + i02*nb2  + i01*nb1 );
+            float * src0_ptr = (float *) ((char *) tensor_data(src0) + i03*nb03 + i02*nb02 + i01*nb01);
+            float * src1_ptr = (float *) ((char *) tensor_data(src1) + i13*nb13 + i12*nb12 + i11*nb11);
 
             for (int64_t r = 0; r < nr0; ++r) {
 #ifdef GGML_USE_ACCELERATE
@@ -5632,12 +5632,12 @@ static void ggml_compute_forward_div_f32(
             const int64_t i12 = i02 % ne12;
             const int64_t i11 = i01 % ne11;
 
-            float * dst_ptr  = (float *) ((char *) dst->data  + i03*nb3  + i02*nb2  + i01*nb1 );
-            float * src0_ptr = (float *) ((char *) src0->data + i03*nb03 + i02*nb02 + i01*nb01);
+            float * dst_ptr  = (float *) ((char *) tensor_data(dst)  + i03*nb3  + i02*nb2  + i01*nb1 );
+            float * src0_ptr = (float *) ((char *) tensor_data(src0) + i03*nb03 + i02*nb02 + i01*nb01);
 
             for (int64_t i0 = 0; i0 < ne00; ++i0) {
                 const int64_t i10 = i0 % ne10;
-                float * src1_ptr = (float *) ((char *) src1->data + i13*nb13 + i12*nb12 + i11*nb11 + i10*nb10);
+                float * src1_ptr = (float *) ((char *) tensor_data(src1) + i13*nb13 + i12*nb12 + i11*nb11 + i10*nb10);
 
                 dst_ptr[i0] = src0_ptr[i0] / (*src1_ptr);
             }
@@ -5680,9 +5680,9 @@ static void ggml_compute_forward_div_f16(
             const int64_t i11 = i01 % ne11;
             const int64_t nr0 = ne00 / ne10;
 
-            ggml_fp16_t * dst_ptr  = (ggml_fp16_t *) ((char *) dst->data  + i03*nb3  + i02*nb2  + i01*nb1 );
-            ggml_fp16_t * src0_ptr = (ggml_fp16_t *) ((char *) src0->data + i03*nb03 + i02*nb02 + i01*nb01);
-            ggml_fp16_t * src1_ptr = (ggml_fp16_t *) ((char *) src1->data + i13*nb13 + i12*nb12 + i11*nb11);
+            ggml_fp16_t * dst_ptr  = (ggml_fp16_t *) ((char *) tensor_data(dst)  + i03*nb3  + i02*nb2  + i01*nb1 );
+            ggml_fp16_t * src0_ptr = (ggml_fp16_t *) ((char *) tensor_data(src0) + i03*nb03 + i02*nb02 + i01*nb01);
+            ggml_fp16_t * src1_ptr = (ggml_fp16_t *) ((char *) tensor_data(src1) + i13*nb13 + i12*nb12 + i11*nb11);
 
             for (int64_t r = 0; r < nr0; ++r) {
                 ggml_vec_div_f16(ne10, dst_ptr + r*ne10, src0_ptr + r*ne10, src1_ptr);
@@ -5738,8 +5738,8 @@ static void ggml_compute_forward_sqr_f32(
 
     for (int i = 0; i < n; i++) {
         ggml_vec_sqr_f32(nc,
-                (float *) ((char *) dst->data  + i*( dst->nb[1])),
-                (float *) ((char *) src0->data + i*(src0->nb[1])));
+                (float *) ((char *) tensor_data(dst)  + i*( dst->nb[1])),
+                (float *) ((char *) tensor_data(src0) + i*(src0->nb[1])));
     }
 }
 
@@ -5763,8 +5763,8 @@ static void ggml_compute_forward_sqr_f16(
 
     for (int i = 0; i < n; i++) {
         ggml_vec_sqr_f16(nc,
-                (ggml_fp16_t *) ((char *) dst->data  + i*( dst->nb[1])),
-                (ggml_fp16_t *) ((char *) src0->data + i*(src0->nb[1])));
+                (ggml_fp16_t *) ((char *) tensor_data(dst)  + i*( dst->nb[1])),
+                (ggml_fp16_t *) ((char *) tensor_data(src0) + i*(src0->nb[1])));
     }
 }
 
@@ -5812,8 +5812,8 @@ static void ggml_compute_forward_sqrt_f32(
 
     for (int i = 0; i < n; i++) {
         ggml_vec_sqrt_f32(nc,
-                (float *) ((char *) dst->data  + i*( dst->nb[1])),
-                (float *) ((char *) src0->data + i*(src0->nb[1])));
+                (float *) ((char *) tensor_data(dst)  + i*( dst->nb[1])),
+                (float *) ((char *) tensor_data(src0) + i*(src0->nb[1])));
     }
 }
 
@@ -5837,8 +5837,8 @@ static void ggml_compute_forward_sqrt_f16(
 
     for (int i = 0; i < n; i++) {
         ggml_vec_sqrt_f16(nc,
-                (ggml_fp16_t *) ((char *) dst->data  + i*( dst->nb[1])),
-                (ggml_fp16_t *) ((char *) src0->data + i*(src0->nb[1])));
+                (ggml_fp16_t *) ((char *) tensor_data(dst)  + i*( dst->nb[1])),
+                (ggml_fp16_t *) ((char *) tensor_data(src0) + i*(src0->nb[1])));
     }
 }
 
@@ -5886,8 +5886,8 @@ static void ggml_compute_forward_log_f32(
 
     for (int i = 0; i < n; i++) {
         ggml_vec_log_f32(nc,
-                (float *) ((char *) dst->data  + i*( dst->nb[1])),
-                (float *) ((char *) src0->data + i*(src0->nb[1])));
+                (float *) ((char *) tensor_data(dst)  + i*( dst->nb[1])),
+                (float *) ((char *) tensor_data(src0) + i*(src0->nb[1])));
     }
 }
 
@@ -5911,8 +5911,8 @@ static void ggml_compute_forward_log_f16(
 
     for (int i = 0; i < n; i++) {
         ggml_vec_log_f16(nc,
-                (ggml_fp16_t *) ((char *) dst->data  + i*( dst->nb[1])),
-                (ggml_fp16_t *) ((char *) src0->data + i*(src0->nb[1])));
+                (ggml_fp16_t *) ((char *) tensor_data(dst)  + i*( dst->nb[1])),
+                (ggml_fp16_t *) ((char *) tensor_data(src0) + i*(src0->nb[1])));
     }
 }
 
@@ -5960,8 +5960,8 @@ static void ggml_compute_forward_sin_f32(
 
     for (int i = 0; i < n; i++) {
         ggml_vec_sin_f32(nc,
-                (float *) ((char *) dst->data  + i*( dst->nb[1])),
-                (float *) ((char *) src0->data + i*(src0->nb[1])));
+                (float *) ((char *) tensor_data(dst)  + i*( dst->nb[1])),
+                (float *) ((char *) tensor_data(src0) + i*(src0->nb[1])));
     }
 }
 
@@ -5985,8 +5985,8 @@ static void ggml_compute_forward_sin_f16(
 
     for (int i = 0; i < n; i++) {
         ggml_vec_sin_f16(nc,
-                (ggml_fp16_t *) ((char *) dst->data  + i*( dst->nb[1])),
-                (ggml_fp16_t *) ((char *) src0->data + i*(src0->nb[1])));
+                (ggml_fp16_t *) ((char *) tensor_data(dst)  + i*( dst->nb[1])),
+                (ggml_fp16_t *) ((char *) tensor_data(src0) + i*(src0->nb[1])));
     }
 }
 
@@ -6034,8 +6034,8 @@ static void ggml_compute_forward_cos_f32(
 
     for (int i = 0; i < n; i++) {
         ggml_vec_cos_f32(nc,
-                (float *) ((char *) dst->data  + i*( dst->nb[1])),
-                (float *) ((char *) src0->data + i*(src0->nb[1])));
+                (float *) ((char *) tensor_data(dst)  + i*( dst->nb[1])),
+                (float *) ((char *) tensor_data(src0) + i*(src0->nb[1])));
     }
 }
 
@@ -6059,8 +6059,8 @@ static void ggml_compute_forward_cos_f16(
 
     for (int i = 0; i < n; i++) {
         ggml_vec_cos_f16(nc,
-                (ggml_fp16_t *) ((char *) dst->data  + i*( dst->nb[1])),
-                (ggml_fp16_t *) ((char *) src0->data + i*(src0->nb[1])));
+                (ggml_fp16_t *) ((char *) tensor_data(dst)  + i*( dst->nb[1])),
+                (ggml_fp16_t *) ((char *) tensor_data(src0) + i*(src0->nb[1])));
     }
 }
 
@@ -6112,12 +6112,12 @@ static void ggml_compute_forward_sum_f32(
             for (int64_t i01 = 0; i01 < ne01; i01++) {
                 ggml_vec_sum_f32_ggf(ne00,
                         &row_sum,
-                        (float *) ((char *) src0->data + i01*nb01 + i02*nb02 + i03*nb03));
+                        (float *) ((char *) tensor_data(src0) + i01*nb01 + i02*nb02 + i03*nb03));
                 sum += row_sum;
             }
         }
     }
-    ((float *) dst->data)[0] = sum;
+    ((float *) tensor_data(dst))[0] = sum;
 }
 
 static void ggml_compute_forward_sum_f16(
@@ -6145,12 +6145,12 @@ static void ggml_compute_forward_sum_f16(
             for (int64_t i01 = 0; i01 < ne01; i01++) {
                 ggml_vec_sum_f16_ggf(ne00,
                     &row_sum,
-                    (ggml_fp16_t *) ((char *) src0->data + i01 * nb01 + i02 * nb02 + i03 * nb03));
+                    (ggml_fp16_t *) ((char *) tensor_data(src0) + i01 * nb01 + i02 * nb02 + i03 * nb03));
                 sum += row_sum;
             }
         }
     }
-    ((ggml_fp16_t *) dst->data)[0] = GGML_FP32_TO_FP16(sum);
+    ((ggml_fp16_t *) tensor_data(dst))[0] = GGML_FP32_TO_FP16(sum);
 }
 
 static void ggml_compute_forward_sum_bf16(
@@ -6178,12 +6178,12 @@ static void ggml_compute_forward_sum_bf16(
             for (int64_t i01 = 0; i01 < ne01; i01++) {
                 ggml_vec_sum_bf16_ggf(ne00,
                     &row_sum,
-                    (ggml_bf16_t *) ((char *) src0->data + i01 * nb01 + i02 * nb02 + i03 * nb03));
+                    (ggml_bf16_t *) ((char *) tensor_data(src0) + i01 * nb01 + i02 * nb02 + i03 * nb03));
                 sum += row_sum;
             }
         }
     }
-    ((ggml_bf16_t *) dst->data)[0] = GGML_FP32_TO_BF16(sum);
+    ((ggml_bf16_t *) tensor_data(dst))[0] = GGML_FP32_TO_BF16(sum);
 }
 
 static void ggml_compute_forward_sum(
@@ -6237,8 +6237,8 @@ static void ggml_compute_forward_sum_rows_f32(
     for (int64_t i3 = 0; i3 < ne03; i3++) {
         for (int64_t i2 = 0; i2 < ne02; i2++) {
             for (int64_t i1 = 0; i1 < ne01; i1++) {
-                float * src_row = (float *) ((char *) src0->data + i1*nb01 + i2*nb02 + i3*nb03);
-                float * dst_row = (float *) ((char *) dst->data  + i1*nb1  + i2*nb2  + i3*nb3);
+                float * src_row = (float *) ((char *) tensor_data(src0) + i1*nb01 + i2*nb02 + i3*nb03);
+                float * dst_row = (float *) ((char *) tensor_data(dst)  + i1*nb1  + i2*nb2  + i3*nb3);
                 float row_sum = 0;
                 ggml_vec_sum_f32(ne00, &row_sum, src_row);
                 dst_row[0] = row_sum;
@@ -6295,10 +6295,10 @@ static void ggml_compute_forward_mean_f32(
         for (int64_t i02 = 0; i02 < ne02; i02++) {
             for (int64_t i01 = 0; i01 < ne01; i01++) {
                 ggml_vec_sum_f32(ne00,
-                        (float *) ((char *)  dst->data + i01*nb1  + i02*nb2  + i03*nb3),
-                        (float *) ((char *) src0->data + i01*nb01 + i02*nb02 + i03*nb03));
+                        (float *) ((char *)  tensor_data(dst) + i01*nb1  + i02*nb2  + i03*nb3),
+                        (float *) ((char *) tensor_data(src0) + i01*nb01 + i02*nb02 + i03*nb03));
 
-                *(float *) ((char *) dst->data + i01*nb1 + i02*nb2 + i03*nb3) /= (float) ne00;
+                *(float *) ((char *) tensor_data(dst) + i01*nb1 + i02*nb2 + i03*nb3) /= (float) ne00;
             }
         }
     }
@@ -6344,8 +6344,8 @@ static void ggml_compute_forward_argmax_f32(
     const size_t nb0 = dst->nb[0];
 
     for (int64_t i1 = 0; i1 < ne01; i1++) {
-        float * src = (float *) ((char *) src0->data + i1*nb01);
-        int32_t * dst_ = (int32_t *) ((char *)  dst->data + i1*nb0);
+        float * src = (float *) ((char *) tensor_data(src0) + i1*nb01);
+        int32_t * dst_ = (int32_t *) ((char *)  tensor_data(dst) + i1*nb0);
         int v = 0;
         ggml_vec_argmax_f32(ne00, &v, src);
         dst_[0] = v;
@@ -6407,8 +6407,8 @@ static void ggml_compute_forward_count_equal_i32(
         const int64_t i02 = (ir - i03*ne03)            /       ne01;
         const int64_t i01 =  ir - i03*ne03 - i02*ne02;
 
-        const char * data0 = (const char *) src0->data + i03*nb03 + i02*nb02 + i01*nb01;
-        const char * data1 = (const char *) src1->data + i03*nb13 + i02*nb12 + i01*nb11;
+        const char * data0 = (const char *) tensor_data(src0) + i03*nb03 + i02*nb02 + i01*nb01;
+        const char * data1 = (const char *) tensor_data(src1) + i03*nb13 + i02*nb12 + i01*nb11;
 
         for (int64_t i00 = 0; i00 < ne00; ++i00) {
             const int32_t val0 = *((const int32_t *) (data0 + i00*nb00));
@@ -6429,7 +6429,7 @@ static void ggml_compute_forward_count_equal_i32(
     for (int ith_other = 1; ith_other < nth; ++ith_other) {
         sum_thread += sums[ith_other];
     }
-    *((int64_t *) dst->data) = sum_thread;
+    *((int64_t *) tensor_data(dst)) = sum_thread;
 }
 
 static void ggml_compute_forward_count_equal(
@@ -6485,8 +6485,8 @@ static void ggml_compute_forward_repeat_f32(
                         for     (int k1 = 0; k1 < ne01; k1++) {
                             for (int i0 = 0; i0 < nr0;  i0++) {
                                 ggml_vec_cpy_f32(ne00,
-                                        (float *) ((char *)  dst->data + (i3*ne03 + k3)*nb3  + (i2*ne02 + k2)*nb2  + (i1*ne01 + k1)*nb1  + (i0*ne00)*nb0),
-                                        (float *) ((char *) src0->data + (          k3)*nb03 + (          k2)*nb02 + (          k1)*nb01));
+                                        (float *) ((char *)  tensor_data(dst) + (i3*ne03 + k3)*nb3  + (i2*ne02 + k2)*nb2  + (i1*ne01 + k1)*nb1  + (i0*ne00)*nb0),
+                                        (float *) ((char *) tensor_data(src0) + (          k3)*nb03 + (          k2)*nb02 + (          k1)*nb01));
                             }
                         }
                     }
@@ -6528,8 +6528,8 @@ static void ggml_compute_forward_repeat_f16(
                     for         (int i1 = 0; i1 < nr1;  i1++) {
                         for     (int k1 = 0; k1 < ne01; k1++) {
                             for (int i0 = 0; i0 < nr0;  i0++) {
-                                ggml_fp16_t * y = (ggml_fp16_t *) ((char *)  dst->data + (i3*ne03 + k3)*nb3  + (i2*ne02 + k2)*nb2  + (i1*ne01 + k1)*nb1  + (i0*ne00)*nb0);
-                                ggml_fp16_t * x = (ggml_fp16_t *) ((char *) src0->data + (          k3)*nb03 + (          k2)*nb02 + (          k1)*nb01);
+                                ggml_fp16_t * y = (ggml_fp16_t *) ((char *)  tensor_data(dst) + (i3*ne03 + k3)*nb3  + (i2*ne02 + k2)*nb2  + (i1*ne01 + k1)*nb1  + (i0*ne00)*nb0);
+                                ggml_fp16_t * x = (ggml_fp16_t *) ((char *) tensor_data(src0) + (          k3)*nb03 + (          k2)*nb02 + (          k1)*nb01);
                                 // ggml_vec_cpy_f16(ne00, y, x)
                                 for (int i = 0; i < ne00; ++i) {
                                     y[i]  = x[i];
@@ -6595,13 +6595,13 @@ static void ggml_compute_forward_repeat_back_f32(
     GGML_ASSERT(nb00 == sizeof(float));
 
     if (ggml_is_contiguous(dst)) {
-        ggml_vec_set_f32(ne0*ne1*ne2*ne3, dst->data, 0);
+        ggml_vec_set_f32(ne0*ne1*ne2*ne3, tensor_data(dst), 0);
     } else {
         for         (int k3 = 0; k3 < ne3; k3++) {
             for     (int k2 = 0; k2 < ne2; k2++) {
                 for (int k1 = 0; k1 < ne1; k1++) {
                     ggml_vec_set_f32(ne0,
-                        (float *) ((char *) dst->data + k1*nb1 + k2*nb2 + k3*nb3),
+                        (float *) ((char *) tensor_data(dst) + k1*nb1 + k2*nb2 + k3*nb3),
                         0);
                 }
             }
@@ -6617,8 +6617,8 @@ static void ggml_compute_forward_repeat_back_f32(
                         for     (int k1 = 0; k1 < ne1; k1++) {
                             for (int i0 = 0; i0 < nr0; i0++) {
                                 ggml_vec_acc_f32(ne0,
-                                        (float *) ((char *)  dst->data + (         k3)*nb3  + (         k2)*nb2  + (         k1)*nb1),
-                                        (float *) ((char *) src0->data + (i3*ne3 + k3)*nb03 + (i2*ne2 + k2)*nb02 + (i1*ne1 + k1)*nb01 + (i0*ne0)*nb00));
+                                        (float *) ((char *)  tensor_data(dst) + (         k3)*nb3  + (         k2)*nb2  + (         k1)*nb1),
+                                        (float *) ((char *) tensor_data(src0) + (i3*ne3 + k3)*nb03 + (i2*ne2 + k2)*nb02 + (i1*ne1 + k1)*nb01 + (i0*ne0)*nb00));
                             }
                         }
                     }
@@ -6677,12 +6677,12 @@ static void ggml_compute_forward_concat_any(
             for (int i1 = 0; i1 < ne1; i1++) {
                 for (int i0 = 0; i0 < ne0; i0++) {
                     if (i0 < ne00 && i1 < ne01 && i2 < ne02 && i3 < ne03) {
-                        x = (const char *)src0->data + (i0       )*nb00 + (i1       )*nb01 + (i2       )*nb02 + (i3       )*nb03;
+                        x = (const char *)tensor_data(src0) + (i0       )*nb00 + (i1       )*nb01 + (i2       )*nb02 + (i3       )*nb03;
                     } else {
-                        x = (const char *)src1->data + (i0 - o[0])*nb10 + (i1 - o[1])*nb11 + (i2 - o[2])*nb12 + (i3 - o[3])*nb13;
+                        x = (const char *)tensor_data(src1) + (i0 - o[0])*nb10 + (i1 - o[1])*nb11 + (i2 - o[2])*nb12 + (i3 - o[3])*nb13;
                     }
 
-                    char * y = (char *)dst->data + i0*nb0 + i1*nb1 + i2*nb2 + i3*nb3;
+                    char * y = (char *)tensor_data(dst) + i0*nb0 + i1*nb1 + i2*nb2 + i3*nb3;
 
                     memcpy(y, x, len);
                 }
@@ -6720,12 +6720,12 @@ static void ggml_compute_forward_concat_i8(
             for (int i1 = 0; i1 < ne1; i1++) {
                 for (int i0 = 0; i0 < ne0; i0++) {
                     if (i0 < ne00 && i1 < ne01 && i2 < ne02 && i3 < ne03) {
-                        x = (const int8_t *) ((const char *)src0->data + (i0       )*nb00 + (i1       )*nb01 + (i2       )*nb02 + (i3       )*nb03);
+                        x = (const int8_t *) ((const char *)tensor_data(src0) + (i0       )*nb00 + (i1       )*nb01 + (i2       )*nb02 + (i3       )*nb03);
                     } else {
-                        x = (const int8_t *) ((const char *)src1->data + (i0 - o[0])*nb10 + (i1 - o[1])*nb11 + (i2 - o[2])*nb12 + (i3 - o[3])*nb13);
+                        x = (const int8_t *) ((const char *)tensor_data(src1) + (i0 - o[0])*nb10 + (i1 - o[1])*nb11 + (i2 - o[2])*nb12 + (i3 - o[3])*nb13);
                     }
 
-                    int8_t * y = (int8_t *)((char *)dst->data + i0*nb0 + i1*nb1 + i2*nb2 + i3*nb3);
+                    int8_t * y = (int8_t *)((char *)tensor_data(dst) + i0*nb0 + i1*nb1 + i2*nb2 + i3*nb3);
 
                     *y = *x;
                 }
@@ -6763,12 +6763,12 @@ static void ggml_compute_forward_concat_f16(
             for (int i1 = 0; i1 < ne1; i1++) {
                 for (int i0 = 0; i0 < ne0; i0++) {
                     if (i0 < ne00 && i1 < ne01 && i2 < ne02 && i3 < ne03) {
-                        x = (const ggml_fp16_t *) ((const char *)src0->data + (i0       )*nb00 + (i1       )*nb01 + (i2       )*nb02 + (i3       )*nb03);
+                        x = (const ggml_fp16_t *) ((const char *)tensor_data(src0) + (i0       )*nb00 + (i1       )*nb01 + (i2       )*nb02 + (i3       )*nb03);
                     } else {
-                        x = (const ggml_fp16_t *) ((const char *)src1->data + (i0 - o[0])*nb10 + (i1 - o[1])*nb11 + (i2 - o[2])*nb12 + (i3 - o[3])*nb13);
+                        x = (const ggml_fp16_t *) ((const char *)tensor_data(src1) + (i0 - o[0])*nb10 + (i1 - o[1])*nb11 + (i2 - o[2])*nb12 + (i3 - o[3])*nb13);
                     }
 
-                    ggml_fp16_t * y = (ggml_fp16_t *)((char *)dst->data + i0*nb0 + i1*nb1 + i2*nb2 + i3*nb3);
+                    ggml_fp16_t * y = (ggml_fp16_t *)((char *)tensor_data(dst) + i0*nb0 + i1*nb1 + i2*nb2 + i3*nb3);
 
                     *y = *x;
                 }
@@ -6806,12 +6806,12 @@ static void ggml_compute_forward_concat_f32(
             for (int i1 = 0; i1 < ne1; i1++) {
                 for (int i0 = 0; i0 < ne0; i0++) {
                     if (i0 < ne00 && i1 < ne01 && i2 < ne02 && i3 < ne03) {
-                        x = (const float *) ((const char *)src0->data + (i0       )*nb00 + (i1       )*nb01 + (i2       )*nb02 + (i3       )*nb03);
+                        x = (const float *) ((const char *)tensor_data(src0) + (i0       )*nb00 + (i1       )*nb01 + (i2       )*nb02 + (i3       )*nb03);
                     } else {
-                        x = (const float *) ((const char *)src1->data + (i0 - o[0])*nb10 + (i1 - o[1])*nb11 + (i2 - o[2])*nb12 + (i3 - o[3])*nb13);
+                        x = (const float *) ((const char *)tensor_data(src1) + (i0 - o[0])*nb10 + (i1 - o[1])*nb11 + (i2 - o[2])*nb12 + (i3 - o[3])*nb13);
                     }
 
-                    float * y = (float *)((char *)dst->data + i0*nb0 + i1*nb1 + i2*nb2 + i3*nb3);
+                    float * y = (float *)((char *)tensor_data(dst) + i0*nb0 + i1*nb1 + i2*nb2 + i3*nb3);
 
                     *y = *x;
                 }
@@ -6870,8 +6870,8 @@ static void ggml_compute_forward_abs_f32(
 
     for (int i = 0; i < n; i++) {
         ggml_vec_abs_f32(nc,
-                (float *) ((char *) dst->data  + i*( dst->nb[1])),
-                (float *) ((char *) src0->data + i*(src0->nb[1])));
+                (float *) ((char *) tensor_data(dst)  + i*( dst->nb[1])),
+                (float *) ((char *) tensor_data(src0) + i*(src0->nb[1])));
     }
 }
 
@@ -6894,8 +6894,8 @@ static void ggml_compute_forward_abs_f16(
 
     for (int i = 0; i < n; i++) {
         ggml_vec_abs_f16(nc,
-                (ggml_fp16_t *) ((char *) dst->data  + i*( dst->nb[1])),
-                (ggml_fp16_t *) ((char *) src0->data + i*(src0->nb[1])));
+                (ggml_fp16_t *) ((char *) tensor_data(dst)  + i*( dst->nb[1])),
+                (ggml_fp16_t *) ((char *) tensor_data(src0) + i*(src0->nb[1])));
     }
 }
 
@@ -6942,8 +6942,8 @@ static void ggml_compute_forward_sgn_f32(
 
     for (int i = 0; i < n; i++) {
         ggml_vec_sgn_f32(nc,
-                (float *) ((char *) dst->data  + i*( dst->nb[1])),
-                (float *) ((char *) src0->data + i*(src0->nb[1])));
+                (float *) ((char *) tensor_data(dst)  + i*( dst->nb[1])),
+                (float *) ((char *) tensor_data(src0) + i*(src0->nb[1])));
     }
 }
 
@@ -6966,8 +6966,8 @@ static void ggml_compute_forward_sgn_f16(
 
     for (int i = 0; i < n; i++) {
         ggml_vec_sgn_f16(nc,
-                (ggml_fp16_t *) ((char *) dst->data  + i*( dst->nb[1])),
-                (ggml_fp16_t *) ((char *) src0->data + i*(src0->nb[1])));
+                (ggml_fp16_t *) ((char *) tensor_data(dst)  + i*( dst->nb[1])),
+                (ggml_fp16_t *) ((char *) tensor_data(src0) + i*(src0->nb[1])));
     }
 }
 
@@ -7014,8 +7014,8 @@ static void ggml_compute_forward_neg_f32(
 
     for (int i = 0; i < n; i++) {
         ggml_vec_neg_f32(nc,
-                (float *) ((char *) dst->data  + i*( dst->nb[1])),
-                (float *) ((char *) src0->data + i*(src0->nb[1])));
+                (float *) ((char *) tensor_data(dst)  + i*( dst->nb[1])),
+                (float *) ((char *) tensor_data(src0) + i*(src0->nb[1])));
     }
 }
 
@@ -7038,8 +7038,8 @@ static void ggml_compute_forward_neg_f16(
 
     for (int i = 0; i < n; i++) {
         ggml_vec_neg_f16(nc,
-                (ggml_fp16_t *) ((char *) dst->data  + i*( dst->nb[1])),
-                (ggml_fp16_t *) ((char *) src0->data + i*(src0->nb[1])));
+                (ggml_fp16_t *) ((char *) tensor_data(dst)  + i*( dst->nb[1])),
+                (ggml_fp16_t *) ((char *) tensor_data(src0) + i*(src0->nb[1])));
     }
 }
 
@@ -7086,8 +7086,8 @@ static void ggml_compute_forward_step_f32(
 
     for (int i = 0; i < n; i++) {
         ggml_vec_step_f32(nc,
-                (float *) ((char *) dst->data  + i*( dst->nb[1])),
-                (float *) ((char *) src0->data + i*(src0->nb[1])));
+                (float *) ((char *) tensor_data(dst)  + i*( dst->nb[1])),
+                (float *) ((char *) tensor_data(src0) + i*(src0->nb[1])));
     }
 }
 
@@ -7110,8 +7110,8 @@ static void ggml_compute_forward_step_f16(
 
     for (int i = 0; i < n; i++) {
         ggml_vec_step_f16(nc,
-                (ggml_fp16_t *) ((char *) dst->data  + i*( dst->nb[1])),
-                (ggml_fp16_t *) ((char *) src0->data + i*(src0->nb[1])));
+                (ggml_fp16_t *) ((char *) tensor_data(dst)  + i*( dst->nb[1])),
+                (ggml_fp16_t *) ((char *) tensor_data(src0) + i*(src0->nb[1])));
     }
 }
 
@@ -7158,8 +7158,8 @@ static void ggml_compute_forward_tanh_f32(
 
     for (int i = 0; i < n; i++) {
         ggml_vec_tanh_f32(nc,
-                (float *) ((char *) dst->data  + i*( dst->nb[1])),
-                (float *) ((char *) src0->data + i*(src0->nb[1])));
+                (float *) ((char *) tensor_data(dst)  + i*( dst->nb[1])),
+                (float *) ((char *) tensor_data(src0) + i*(src0->nb[1])));
     }
 }
 
@@ -7182,8 +7182,8 @@ static void ggml_compute_forward_tanh_f16(
 
     for (int i = 0; i < n; i++) {
         ggml_vec_tanh_f16(nc,
-                (ggml_fp16_t *) ((char *) dst->data  + i*( dst->nb[1])),
-                (ggml_fp16_t *) ((char *) src0->data + i*(src0->nb[1])));
+                (ggml_fp16_t *) ((char *) tensor_data(dst)  + i*( dst->nb[1])),
+                (ggml_fp16_t *) ((char *) tensor_data(src0) + i*(src0->nb[1])));
     }
 }
 
@@ -7230,8 +7230,8 @@ static void ggml_compute_forward_elu_f32(
 
     for (int i = 0; i < n; i++) {
         ggml_vec_elu_f32(nc,
-                (float *) ((char *) dst->data  + i*( dst->nb[1])),
-                (float *) ((char *) src0->data + i*(src0->nb[1])));
+                (float *) ((char *) tensor_data(dst)  + i*( dst->nb[1])),
+                (float *) ((char *) tensor_data(src0) + i*(src0->nb[1])));
     }
 }
 
@@ -7254,8 +7254,8 @@ static void ggml_compute_forward_elu_f16(
 
     for (int i = 0; i < n; i++) {
         ggml_vec_elu_f16(nc,
-                (ggml_fp16_t *) ((char *) dst->data  + i*( dst->nb[1])),
-                (ggml_fp16_t *) ((char *) src0->data + i*(src0->nb[1])));
+                (ggml_fp16_t *) ((char *) tensor_data(dst)  + i*( dst->nb[1])),
+                (ggml_fp16_t *) ((char *) tensor_data(src0) + i*(src0->nb[1])));
     }
 }
 
@@ -7302,8 +7302,8 @@ static void ggml_compute_forward_relu_f32(
 
     for (int i = 0; i < n; i++) {
         ggml_vec_relu_f32(nc,
-                (float *) ((char *) dst->data  + i*( dst->nb[1])),
-                (float *) ((char *) src0->data + i*(src0->nb[1])));
+                (float *) ((char *) tensor_data(dst)  + i*( dst->nb[1])),
+                (float *) ((char *) tensor_data(src0) + i*(src0->nb[1])));
     }
 }
 
@@ -7326,8 +7326,8 @@ static void ggml_compute_forward_relu_f16(
 
     for (int i = 0; i < n; i++) {
         ggml_vec_relu_f16(nc,
-                (ggml_fp16_t *) ((char *) dst->data  + i*( dst->nb[1])),
-                (ggml_fp16_t *) ((char *) src0->data + i*(src0->nb[1])));
+                (ggml_fp16_t *) ((char *) tensor_data(dst)  + i*( dst->nb[1])),
+                (ggml_fp16_t *) ((char *) tensor_data(src0) + i*(src0->nb[1])));
     }
 }
 
@@ -7374,8 +7374,8 @@ static void ggml_compute_forward_sigmoid_f32(
 
     for (int i = 0; i < n; i++) {
         ggml_vec_sigmoid_f32(nc,
-                (float *) ((char *) dst->data  + i*( dst->nb[1])),
-                (float *) ((char *) src0->data + i*(src0->nb[1])));
+                (float *) ((char *) tensor_data(dst)  + i*( dst->nb[1])),
+                (float *) ((char *) tensor_data(src0) + i*(src0->nb[1])));
     }
 }
 
@@ -7398,8 +7398,8 @@ static void ggml_compute_forward_sigmoid_f16(
 
     for (int i = 0; i < n; i++) {
         ggml_vec_sigmoid_f16(nc,
-                (ggml_fp16_t *) ((char *) dst->data  + i*( dst->nb[1])),
-                (ggml_fp16_t *) ((char *) src0->data + i*(src0->nb[1])));
+                (ggml_fp16_t *) ((char *) tensor_data(dst)  + i*( dst->nb[1])),
+                (ggml_fp16_t *) ((char *) tensor_data(src0) + i*(src0->nb[1])));
     }
 }
 
@@ -7452,12 +7452,12 @@ static void ggml_compute_forward_gelu_f32(
 
     for (int i1 = ir0; i1 < ir1; i1++) {
         ggml_vec_gelu_f32(nc,
-                (float *) ((char *) dst->data  + i1*( dst->nb[1])),
-                (float *) ((char *) src0->data + i1*(src0->nb[1])));
+                (float *) ((char *) tensor_data(dst)  + i1*( dst->nb[1])),
+                (float *) ((char *) tensor_data(src0) + i1*(src0->nb[1])));
 
 #ifndef NDEBUG
         for (int k = 0; k < nc; k++) {
-            const float x = ((float *) ((char *) dst->data + i1*( dst->nb[1])))[k];
+            const float x = ((float *) ((char *) tensor_data(dst) + i1*( dst->nb[1])))[k];
             UNUSED(x);
             assert(!isnan(x));
             assert(!isinf(x));
@@ -7491,12 +7491,12 @@ static void ggml_compute_forward_gelu_f16(
 
     for (int i1 = ir0; i1 < ir1; i1++) {
         ggml_vec_gelu_f16(nc,
-                (ggml_fp16_t *) ((char *) dst->data  + i1*( dst->nb[1])),
-                (ggml_fp16_t *) ((char *) src0->data + i1*(src0->nb[1])));
+                (ggml_fp16_t *) ((char *) tensor_data(dst)  + i1*( dst->nb[1])),
+                (ggml_fp16_t *) ((char *) tensor_data(src0) + i1*(src0->nb[1])));
 
 #ifndef NDEBUG
         for (int k = 0; k < nc; k++) {
-            const ggml_fp16_t x = ((ggml_fp16_t *) ((char *) dst->data + i1*( dst->nb[1])))[k];
+            const ggml_fp16_t x = ((ggml_fp16_t *) ((char *) tensor_data(dst) + i1*( dst->nb[1])))[k];
             const float v = GGML_FP16_TO_FP32(x);
             UNUSED(v);
             assert(!isnan(v));
@@ -7555,12 +7555,12 @@ static void ggml_compute_forward_gelu_quick_f32(
 
     for (int i1 = ir0; i1 < ir1; i1++) {
         ggml_vec_gelu_quick_f32(nc,
-                (float *) ((char *) dst->data  + i1*( dst->nb[1])),
-                (float *) ((char *) src0->data + i1*(src0->nb[1])));
+                (float *) ((char *) tensor_data(dst)  + i1*( dst->nb[1])),
+                (float *) ((char *) tensor_data(src0) + i1*(src0->nb[1])));
 
 #ifndef NDEBUG
         for (int k = 0; k < nc; k++) {
-            const float x = ((float *) ((char *) dst->data + i1*( dst->nb[1])))[k];
+            const float x = ((float *) ((char *) tensor_data(dst) + i1*( dst->nb[1])))[k];
             UNUSED(x);
             assert(!isnan(x));
             assert(!isinf(x));
@@ -7594,12 +7594,12 @@ static void ggml_compute_forward_gelu_quick_f16(
 
     for (int i1 = ir0; i1 < ir1; i1++) {
         ggml_vec_gelu_quick_f16(nc,
-                (ggml_fp16_t *) ((char *) dst->data  + i1*( dst->nb[1])),
-                (ggml_fp16_t *) ((char *) src0->data + i1*(src0->nb[1])));
+                (ggml_fp16_t *) ((char *) tensor_data(dst)  + i1*( dst->nb[1])),
+                (ggml_fp16_t *) ((char *) tensor_data(src0) + i1*(src0->nb[1])));
 
 #ifndef NDEBUG
         for (int k = 0; k < nc; k++) {
-            const ggml_fp16_t x = ((ggml_fp16_t *) ((char *) dst->data + i1*( dst->nb[1])))[k];
+            const ggml_fp16_t x = ((ggml_fp16_t *) ((char *) tensor_data(dst) + i1*( dst->nb[1])))[k];
             const float v = GGML_FP16_TO_FP32(x);
             UNUSED(v);
             assert(!isnan(v));
@@ -7658,12 +7658,12 @@ static void ggml_compute_forward_silu_f32(
 
     for (int i1 = ir0; i1 < ir1; i1++) {
         ggml_vec_silu_f32(nc,
-                (float *) ((char *) dst->data  + i1*( dst->nb[1])),
-                (float *) ((char *) src0->data + i1*(src0->nb[1])));
+                (float *) ((char *) tensor_data(dst)  + i1*( dst->nb[1])),
+                (float *) ((char *) tensor_data(src0) + i1*(src0->nb[1])));
 
 #ifndef NDEBUG
         for (int k = 0; k < nc; k++) {
-            const float x = ((float *) ((char *) dst->data + i1*(dst->nb[1])))[k];
+            const float x = ((float *) ((char *) tensor_data(dst) + i1*(dst->nb[1])))[k];
             UNUSED(x);
             assert(!isnan(x));
             assert(!isinf(x));
@@ -7697,12 +7697,12 @@ static void ggml_compute_forward_silu_f16(
 
     for (int i1 = ir0; i1 < ir1; i1++) {
         ggml_vec_silu_f16(nc,
-                (ggml_fp16_t *) ((char *) dst->data  + i1*( dst->nb[1])),
-                (ggml_fp16_t *) ((char *) src0->data + i1*(src0->nb[1])));
+                (ggml_fp16_t *) ((char *) tensor_data(dst)  + i1*( dst->nb[1])),
+                (ggml_fp16_t *) ((char *) tensor_data(src0) + i1*(src0->nb[1])));
 
 #ifndef NDEBUG
         for (int k = 0; k < nc; k++) {
-            const ggml_fp16_t x = ((ggml_fp16_t *) ((char *) dst->data + i1*(dst->nb[1])))[k];
+            const ggml_fp16_t x = ((ggml_fp16_t *) ((char *) tensor_data(dst) + i1*(dst->nb[1])))[k];
             const float v = GGML_FP16_TO_FP32(x);
             UNUSED(v);
             assert(!isnan(v));
@@ -7760,8 +7760,8 @@ static void ggml_compute_forward_leaky_relu_f32(
 
     for (int i = 0; i < n; i++) {
         ggml_vec_leaky_relu_f32(nc,
-                (float *) ((char *) dst->data  + i*( dst->nb[1])),
-                (float *) ((char *) src0->data + i*(src0->nb[1])), negative_slope);
+                (float *) ((char *) tensor_data(dst)  + i*( dst->nb[1])),
+                (float *) ((char *) tensor_data(src0) + i*(src0->nb[1])), negative_slope);
     }
 }
 
@@ -7790,8 +7790,8 @@ static void ggml_compute_forward_leaky_relu_f16(
 
     for (int i = 0; i < n; i++) {
         ggml_vec_leaky_relu_f16(nc,
-                (ggml_fp16_t *) ((char *) dst->data  + i*( dst->nb[1])),
-                (ggml_fp16_t *) ((char *) src0->data + i*(src0->nb[1])), negative_slope);
+                (ggml_fp16_t *) ((char *) tensor_data(dst)  + i*( dst->nb[1])),
+                (ggml_fp16_t *) ((char *) tensor_data(src0) + i*(src0->nb[1])), negative_slope);
     }
 }
 
@@ -7847,13 +7847,13 @@ static void ggml_compute_forward_silu_back_f32(
 
     for (int i1 = ir0; i1 < ir1; i1++) {
         ggml_vec_silu_backward_f32(nc,
-                (float *) ((char *) dst->data  + i1*( dst->nb[1])),
-                (float *) ((char *) src1->data + i1*(src1->nb[1])),
-                (float *) ((char *) grad->data + i1*(grad->nb[1])));
+                (float *) ((char *) tensor_data(dst)  + i1*( dst->nb[1])),
+                (float *) ((char *) tensor_data(src1) + i1*(src1->nb[1])),
+                (float *) ((char *) tensor_data(grad) + i1*(grad->nb[1])));
 
 #ifndef NDEBUG
         for (int k = 0; k < nc; k++) {
-            const float x = ((float *) ((char *) dst->data + i1*( dst->nb[1])))[k];
+            const float x = ((float *) ((char *) tensor_data(dst) + i1*( dst->nb[1])))[k];
             UNUSED(x);
             assert(!isnan(x));
             assert(!isinf(x));
@@ -7890,13 +7890,13 @@ static void ggml_compute_forward_silu_back_f16(
 
     for (int i1 = ir0; i1 < ir1; i1++) {
         ggml_vec_silu_backward_f16(nc,
-                (ggml_fp16_t *) ((char *) dst->data  + i1*( dst->nb[1])),
-                (ggml_fp16_t *) ((char *) src1->data + i1*(src1->nb[1])),
-                (ggml_fp16_t *) ((char *) grad->data + i1*(grad->nb[1])));
+                (ggml_fp16_t *) ((char *) tensor_data(dst)  + i1*( dst->nb[1])),
+                (ggml_fp16_t *) ((char *) tensor_data(src1) + i1*(src1->nb[1])),
+                (ggml_fp16_t *) ((char *) tensor_data(grad) + i1*(grad->nb[1])));
 
     #ifndef NDEBUG
         for (int k = 0; k < nc; k++) {
-            const float x = ((ggml_fp16_t *) ((char *) dst->data + i1*( dst->nb[1])))[k];
+            const float x = ((ggml_fp16_t *) ((char *) tensor_data(dst) + i1*( dst->nb[1])))[k];
             const float v = GGML_FP16_TO_FP32(x);
             UNUSED(v);
             assert(!isnan(v));
@@ -7947,8 +7947,8 @@ static void ggml_compute_forward_hardswish_f32(
 
     for (int i = 0; i < n; i++) {
         ggml_vec_hardswish_f32(nc,
-                (float *) ((char *) dst->data  + i*( dst->nb[1])),
-                (float *) ((char *) src0->data + i*(src0->nb[1])));
+                (float *) ((char *) tensor_data(dst)  + i*( dst->nb[1])),
+                (float *) ((char *) tensor_data(src0) + i*(src0->nb[1])));
     }
 }
 
@@ -7971,8 +7971,8 @@ static void ggml_compute_forward_hardswish_f16(
 
     for (int i = 0; i < n; i++) {
         ggml_vec_hardswish_f16(nc,
-                (ggml_fp16_t *) ((char *) dst->data  + i*( dst->nb[1])),
-                (ggml_fp16_t *) ((char *) src0->data + i*(src0->nb[1])));
+                (ggml_fp16_t *) ((char *) tensor_data(dst)  + i*( dst->nb[1])),
+                (ggml_fp16_t *) ((char *) tensor_data(src0) + i*(src0->nb[1])));
     }
 }
 
@@ -8017,8 +8017,8 @@ static void ggml_compute_forward_hardsigmoid_f32(
 
     for (int i = 0; i < n; i++) {
         ggml_vec_hardsigmoid_f32(nc,
-                (float *) ((char *) dst->data  + i*( dst->nb[1])),
-                (float *) ((char *) src0->data + i*(src0->nb[1])));
+                (float *) ((char *) tensor_data(dst)  + i*( dst->nb[1])),
+                (float *) ((char *) tensor_data(src0) + i*(src0->nb[1])));
     }
 }
 
@@ -8041,8 +8041,8 @@ static void ggml_compute_forward_hardsigmoid_f16(
 
     for (int i = 0; i < n; i++) {
         ggml_vec_hardsigmoid_f16(nc,
-                (ggml_fp16_t *) ((char *) dst->data  + i*( dst->nb[1])),
-                (ggml_fp16_t *) ((char *) src0->data + i*(src0->nb[1])));
+                (ggml_fp16_t *) ((char *) tensor_data(dst)  + i*( dst->nb[1])),
+                (ggml_fp16_t *) ((char *) tensor_data(src0) + i*(src0->nb[1])));
     }
 }
 
@@ -8087,8 +8087,8 @@ static void ggml_compute_forward_exp_f32(
 
     for (int i = 0; i < n; i++) {
         ggml_vec_exp_f32(nc,
-                (float *) ((char *) dst->data  + i*( dst->nb[1])),
-                (float *) ((char *) src0->data + i*(src0->nb[1])));
+                (float *) ((char *) tensor_data(dst)  + i*( dst->nb[1])),
+                (float *) ((char *) tensor_data(src0) + i*(src0->nb[1])));
     }
 }
 
@@ -8111,8 +8111,8 @@ static void ggml_compute_forward_exp_f16(
 
     for (int i = 0; i < n; i++) {
         ggml_vec_exp_f16(nc,
-                (ggml_fp16_t *) ((char *) dst->data  + i*( dst->nb[1])),
-                (ggml_fp16_t *) ((char *) src0->data + i*(src0->nb[1])));
+                (ggml_fp16_t *) ((char *) tensor_data(dst)  + i*( dst->nb[1])),
+                (ggml_fp16_t *) ((char *) tensor_data(src0) + i*(src0->nb[1])));
     }
 }
 
@@ -8165,7 +8165,7 @@ static void ggml_compute_forward_norm_f32(
     for (int64_t i03 = 0; i03 < ne03; i03++) {
         for (int64_t i02 = 0; i02 < ne02; i02++) {
             for (int64_t i01 = ith; i01 < ne01; i01 += nth) {
-                const float * x = (float *) ((char *) src0->data + i01*nb01 + i02*nb02 + i03*nb03);
+                const float * x = (float *) ((char *) tensor_data(src0) + i01*nb01 + i02*nb02 + i03*nb03);
 
                 ggml_float sum = 0.0;
                 for (int64_t i00 = 0; i00 < ne00; i00++) {
@@ -8174,7 +8174,7 @@ static void ggml_compute_forward_norm_f32(
 
                 float mean = sum/ne00;
 
-                float * y = (float *) ((char *) dst->data + i01*nb1 + i02*nb2 + i03*nb3);
+                float * y = (float *) ((char *) tensor_data(dst) + i01*nb1 + i02*nb2 + i03*nb3);
 
                 ggml_float sum2 = 0.0;
                 for (int64_t i00 = 0; i00 < ne00; i00++) {
@@ -8236,7 +8236,7 @@ static void ggml_compute_forward_rms_norm_f32(
     for (int64_t i03 = 0; i03 < ne03; i03++) {
         for (int64_t i02 = 0; i02 < ne02; i02++) {
             for (int64_t i01 = ith; i01 < ne01; i01 += nth) {
-                const float * x = (float *) ((char *) src0->data + i01*nb01 + i02*nb02 + i03*nb03);
+                const float * x = (float *) ((char *) tensor_data(src0) + i01*nb01 + i02*nb02 + i03*nb03);
 
                 ggml_float sum = 0.0;
                 for (int64_t i00 = 0; i00 < ne00; i00++) {
@@ -8245,7 +8245,7 @@ static void ggml_compute_forward_rms_norm_f32(
 
                 const float mean = sum/ne00;
 
-                float * y = (float *) ((char *) dst->data + i01*nb1 + i02*nb2 + i03*nb3);
+                float * y = (float *) ((char *) tensor_data(dst) + i01*nb1 + i02*nb2 + i03*nb3);
 
                 memcpy(y, x, ne00 * sizeof(float));
                 // for (int i00 = 0; i00 < ne00; i00++) {
@@ -8307,8 +8307,8 @@ static void ggml_compute_forward_rms_norm_back_f32(
                 const int64_t i12 = i02;
                 const int64_t i13 = i03;
 
-                const float * dz = (float *) ((char *) src0->data + i01*nb01 + i02*nb02 + i03*nb03);
-                const float * x  = (float *) ((char *) src1->data + i11*nb11 + i12*nb12 + i13*nb13);
+                const float * dz = (float *) ((char *) tensor_data(src0) + i01*nb01 + i02*nb02 + i03*nb03);
+                const float * x  = (float *) ((char *) tensor_data(src1) + i11*nb11 + i12*nb12 + i13*nb13);
 
                 ggml_float sum_xx  = 0.0;
                 ggml_float sum_xdz = 0.0;
@@ -8422,7 +8422,7 @@ static void ggml_compute_forward_rms_norm_back_f32(
                 // dx := scale(dx,-mean_xdz/mean_eps)
                 // dx := add(dx, dz)
                 // dx := scale(dx, rrms)
-                float * dx = (float *) ((char *) dst->data + i01*nb1 + i02*nb2 + i03*nb3);
+                float * dx = (float *) ((char *) tensor_data(dst) + i01*nb1 + i02*nb2 + i03*nb3);
 
                 // dx[i00] = (x*(-sum_xdz/sum_eps) + dz) / sqrtf(mean_eps)
                 ggml_vec_cpy_f32  (ne00, dx, x);
@@ -8490,7 +8490,7 @@ static void ggml_compute_forward_group_norm_f32(
             ggml_float sum = 0.0;
             for (int64_t i02 = start; i02 < end; i02++) {
                 for (int64_t i01 = 0; i01 < ne01; i01++) {
-                    const float * x = (float *)((char *) src0->data + i01 * nb01 + i02 * nb02 + i03 * nb03);
+                    const float * x = (float *)((char *) tensor_data(src0) + i01 * nb01 + i02 * nb02 + i03 * nb03);
 
                     ggml_float sumr = 0.0;
                     for (int64_t i00 = 0; i00 < ne00; i00++) {
@@ -8504,9 +8504,9 @@ static void ggml_compute_forward_group_norm_f32(
             ggml_float sum2 = 0.0;
             for (int64_t i02 = start; i02 < end; i02++) {
                 for (int64_t i01 = 0; i01 < ne01; i01++) {
-                    const float * x = (float *)((char *) src0->data + i01 * nb01 + i02 * nb02 + i03 * nb03);
+                    const float * x = (float *)((char *) tensor_data(src0) + i01 * nb01 + i02 * nb02 + i03 * nb03);
 
-                    float * y = (float *)((char *) dst->data + i01 * nb1 + i02 * nb2 + i03 * nb3);
+                    float * y = (float *)((char *) tensor_data(dst) + i01 * nb1 + i02 * nb2 + i03 * nb3);
 
                     ggml_float sumr = 0.0;
                     for (int64_t i00 = 0; i00 < ne00; i00++) {
@@ -8522,7 +8522,7 @@ static void ggml_compute_forward_group_norm_f32(
 
             for (int64_t i02 = start; i02 < end; i02++) {
                 for (int64_t i01 = 0; i01 < ne01; i01++) {
-                    float * y = (float *)((char *) dst->data + i01 * nb1 + i02 * nb2 + i03 * nb3);
+                    float * y = (float *)((char *) tensor_data(dst) + i01 * nb1 + i02 * nb2 + i03 * nb3);
                     ggml_vec_scale_f32(ne00, y, scale);
                 }
             }
@@ -8581,7 +8581,7 @@ static void ggml_compute_forward_mul_mat_one_chunk(
         return;
     }
 
-    const void * wdata = (src1->type == vec_dot_type) ? src1->data : params->wdata;
+    const void * wdata = (src1->type == vec_dot_type) ? tensor_data(src1) : params->wdata;
     const size_t row_size = ggml_row_size(vec_dot_type, ne10);
 
     assert(ne12 % ne02 == 0);
@@ -8612,7 +8612,7 @@ static void ggml_compute_forward_mul_mat_one_chunk(
                 const int64_t i2 = i12;
                 const int64_t i3 = i13;
 
-                const char * src0_row = (const char*)src0->data + (0 + i02 * nb02 + i03 * nb03);
+                const char * src0_row = (const char*)tensor_data(src0) + (0 + i02 * nb02 + i03 * nb03);
 
                 // desc: when src1 is not a contiguous memory block we have to calculate the offset using the strides
                 //       if it is, then we have either copied the data to params->wdata and made it contiguous or we are using
@@ -8622,7 +8622,7 @@ static void ggml_compute_forward_mul_mat_one_chunk(
                     (src1_cont || src1->type != vec_dot_type
                         ? (i11 + i12 * ne11 + i13 * ne12 * ne11) * row_size
                         : (i11 * nb11 + i12 * nb12 + i13 * nb13));
-                float * dst_col = (float*)((char*)dst->data + (i1 * nb1 + i2 * nb2 + i3 * nb3));
+                float * dst_col = (float*)((char*)tensor_data(dst) + (i1 * nb1 + i2 * nb2 + i3 * nb3));
 
                 //for (int64_t ir0 = iir0; ir0 < iir0 + blck_0 && ir0 < ir0_end; ++ir0) {
                 //    vec_dot(ne00, &dst_col[ir0], src0_row + ir0*nb01, src1_col);
@@ -8687,11 +8687,11 @@ static void ggml_compute_forward_mul_mat(
             for (int64_t i12 = 0; i12 < ne12; i12++)
                 if (!llamafile_sgemm(params,
                                      ne01, ne11, ne00/ggml_blck_size(src0->type),
-                                     (const char *)src0->data + i12/r2*nb02 + i13/r3*nb03,
+                                     (const char *)tensor_data(src0) + i12/r2*nb02 + i13/r3*nb03,
                                      nb01/ggml_type_size(src0->type),
-                                     (const char *)src1->data + i12*nb12 + i13*nb13,
+                                     (const char *)tensor_data(src1) + i12*nb12 + i13*nb13,
                                      nb11/ggml_type_size(src1->type),
-                                     (char *)dst->data + i12*nb2 + i13*nb3,
+                                     (char *)tensor_data(dst) + i12*nb2 + i13*nb3,
                                      nb1/ggml_type_size(dst->type),
                                      src0->type,
                                      src1->type,
@@ -8730,7 +8730,7 @@ UseGgmlGemm1:;
                     size_t bs = ggml_blck_size(vec_dot_type);
                     int64_t ne10_block_start = (ith * ne10/bs) / nth;
                     int64_t ne10_block_end   = ((ith + 1) * ne10/bs) / nth;
-                    from_float((float *)((char *) src1->data + i13*nb13 + i12*nb12 + i11*nb11 + ne10_block_start*bs*nb10),
+                    from_float((float *)((char *) tensor_data(src1) + i13*nb13 + i12*nb12 + i11*nb11 + ne10_block_start*bs*nb10),
                                (void *)               (wdata + i13*nbw3 + i12*nbw2 + i11*nbw1 + ne10_block_start*nbw0),
                                (ne10_block_end - ne10_block_start) * bs);
                 }
@@ -8748,18 +8748,18 @@ UseGgmlGemm1:;
 
 #if GGML_USE_LLAMAFILE
     if (src1->type != vec_dot_type) {
-        const void* wdata = (src1->type == vec_dot_type) ? src1->data : params->wdata;
+        const void* wdata = (src1->type == vec_dot_type) ? tensor_data(src1) : params->wdata;
         const size_t row_size = ggml_row_size(vec_dot_type, ne10);
 
         for (int64_t i13 = 0; i13 < ne13; i13++)
             for (int64_t i12 = 0; i12 < ne12; i12++)
                 if (!llamafile_sgemm(params,
                                      ne01, ne11, ne00/ggml_blck_size(src0->type),
-                                     (const char *)src0->data + i12/r2*nb02 + i13/r3*nb03,
+                                     (const char *)tensor_data(src0) + i12/r2*nb02 + i13/r3*nb03,
                                      nb01/ggml_type_size(src0->type),
                                      (const char *)wdata + (i12*ne11 + i13*ne12*ne11)*row_size,
                                      row_size/ggml_type_size(vec_dot_type),
-                                     (char *)dst->data + i12*nb2 + i13*nb3,
+                                     (char *)tensor_data(dst) + i12*nb2 + i13*nb3,
                                      nb1/ggml_type_size(dst->type),
                                      src0->type,
                                      vec_dot_type,
@@ -8894,7 +8894,7 @@ static void ggml_compute_forward_mul_mat_id_one_chunk(
                     ? (i11      + i12*ne11)*row_size
                     : (i11*nb11 + i12*nb12));
 
-                float * dst_col = (float *) ((char *) dst->data + (i1*nb1 + i2*nb2));
+                float * dst_col = (float *) ((char *) tensor_data(dst) + (i1*nb1 + i2*nb2));
 
                 for (int64_t ir0 = iir0; ir0 < iir0 + blck_0 && ir0 < ir0_end; ++ir0) {
                     vec_dot(ne00, &tmp[ir0 - iir0], 0, src0_cur + ir0*nb01, 0, src1_col, 0, 1);
@@ -8993,7 +8993,7 @@ static void ggml_compute_forward_mul_mat_id(
                     size_t bs = ggml_blck_size(vec_dot_type);
                     int64_t ne10_block_start = (ith * ne10/bs) / nth;
                     int64_t ne10_block_end   = ((ith + 1) * ne10/bs) / nth;
-                    from_float((float *)((char *) src1->data + i13*nb13 + i12*nb12 + i11*nb11 + ne10_block_start*bs*nb10),
+                    from_float((float *)((char *) tensor_data(src1) + i13*nb13 + i12*nb12 + i11*nb11 + ne10_block_start*bs*nb10),
                                (void *)               (wdata + i13*nbw3 + i12*nbw2 + i11*nbw1 + ne10_block_start*nbw0),
                                (ne10_block_end - ne10_block_start) * bs);
                 }
@@ -9009,7 +9009,7 @@ static void ggml_compute_forward_mul_mat_id(
         // group rows by src0 matrix
         for (int64_t iid1 = 0; iid1 < ids->ne[1]; ++iid1) {
             for (int id = 0; id < n_ids; ++id) {
-                const int32_t i02 = *(const int32_t *) ((const char *) ids->data + iid1*ids->nb[1] + id*ids->nb[0]);
+                const int32_t i02 = *(const int32_t *) ((const char *) tensor_data(ids) + iid1*ids->nb[1] + id*ids->nb[0]);
 
                 assert(i02 >= 0 && i02 < n_as);
 
@@ -9034,8 +9034,8 @@ static void ggml_compute_forward_mul_mat_id(
             continue;
         }
 
-        const char * src0_cur = (const char *) src0->data + cur_a * nb02;
-        const void * wdata = (src1->type == vec_dot_type) ? src1->data : params->wdata;
+        const char * src0_cur = (const char *) tensor_data(src0) + cur_a * nb02;
+        const void * wdata = (src1->type == vec_dot_type) ? tensor_data(src1) : params->wdata;
         const size_t row_size = ggml_row_size(vec_dot_type, ne10);
 
         const int64_t nr0 = ne01;
@@ -9133,7 +9133,7 @@ static void ggml_compute_forward_out_prod_f32(
     //   compute by src0 rows
 
     if (ith == 0) {
-        ggml_vec_set_f32(ne0*ne1*ne2*ne3, dst->data, 0);
+        ggml_vec_set_f32(ne0*ne1*ne2*ne3, tensor_data(dst), 0);
     }
     ggml_barrier(params->threadpool);
 
@@ -9186,18 +9186,18 @@ static void ggml_compute_forward_out_prod_f32(
                 for (int64_t i01 = bi01; i01 < bne01_unroll; i01 += GGML_VEC_MAD_UNROLL) {
                     const int64_t i11 = i01;
 
-                    float * s0 = (float *) ((char *) src0->data + (          i01*nb01 + i02*nb02 + i03*nb03));
-                    float * s1 = (float *) ((char *) src1->data + (i1*nb10 + i11*nb11 + i12*nb12 + i13*nb13));
-                    float * d  = (float *) ((char *)  dst->data + (          i1*nb1   + i2*nb2   + i3*nb3));
+                    float * s0 = (float *) ((char *) tensor_data(src0) + (          i01*nb01 + i02*nb02 + i03*nb03));
+                    float * s1 = (float *) ((char *) tensor_data(src1) + (i1*nb10 + i11*nb11 + i12*nb12 + i13*nb13));
+                    float * d  = (float *) ((char *)  tensor_data(dst) + (          i1*nb1   + i2*nb2   + i3*nb3));
 
                     ggml_vec_mad_f32_unroll(ne0, nb01, nb11, d, s0, s1);
                 }
                 for (int64_t i01 = bne01_unroll; i01 < bne01; ++i01) {
                     const int64_t i11 = i01;
 
-                    float * s0 = (float *) ((char *) src0->data + (          i01*nb01 + i02*nb02 + i03*nb03));
-                    float * s1 = (float *) ((char *) src1->data + (i1*nb10 + i11*nb11 + i12*nb12 + i13*nb13));
-                    float * d  = (float *) ((char *)  dst->data + (          i1*nb1   + i2*nb2   + i3*nb3));
+                    float * s0 = (float *) ((char *) tensor_data(src0) + (          i01*nb01 + i02*nb02 + i03*nb03));
+                    float * s1 = (float *) ((char *) tensor_data(src1) + (i1*nb10 + i11*nb11 + i12*nb12 + i13*nb13));
+                    float * d  = (float *) ((char *)  tensor_data(dst) + (          i1*nb1   + i2*nb2   + i3*nb3));
 
                     ggml_vec_mad_f32(ne0, d, s0, *s1);
                 }
@@ -9205,9 +9205,9 @@ static void ggml_compute_forward_out_prod_f32(
                 for (int64_t i01 = bi01; i01 < bne01; ++i01) {
                     const int64_t i11 = i01;
 
-                    float * s0 = (float *) ((char *) src0->data + (          i01*nb01 + i02*nb02 + i03*nb03));
-                    float * s1 = (float *) ((char *) src1->data + (i1*nb10 + i11*nb11 + i12*nb12 + i13*nb13));
-                    float * d  = (float *) ((char *)  dst->data + (          i1*nb1 + i2*nb2 + i3*nb3));
+                    float * s0 = (float *) ((char *) tensor_data(src0) + (          i01*nb01 + i02*nb02 + i03*nb03));
+                    float * s1 = (float *) ((char *) tensor_data(src1) + (i1*nb10 + i11*nb11 + i12*nb12 + i13*nb13));
+                    float * d  = (float *) ((char *)  tensor_data(dst) + (          i1*nb1 + i2*nb2 + i3*nb3));
 
                     ggml_vec_mad_f32(ne0, d, s0, *s1);
                 }
@@ -9255,7 +9255,7 @@ static void ggml_compute_forward_out_prod_q_f32(
     //   compute by src0 rows
 
     if (ith == 0) {
-        ggml_vec_set_f32(ne0*ne1*ne2*ne3, dst->data, 0);
+        ggml_vec_set_f32(ne0*ne1*ne2*ne3, tensor_data(dst), 0);
     }
     ggml_barrier(params->threadpool);
 
@@ -9296,9 +9296,9 @@ static void ggml_compute_forward_out_prod_q_f32(
         for (int64_t i01 = 0; i01 < ne01; ++i01) {
             const int64_t i11 = i01;
 
-            float * s0 = (float *) ((char *) src0->data + (          i01*nb01 + i02*nb02 + i03*nb03));
-            float * s1 = (float *) ((char *) src1->data + (i1*nb10 + i11*nb11 + i12*nb12 + i13*nb13));
-            float * d  = (float *) ((char *)  dst->data + (          i1*nb1 + i2*nb2 + i3*nb3));
+            float * s0 = (float *) ((char *) tensor_data(src0) + (          i01*nb01 + i02*nb02 + i03*nb03));
+            float * s1 = (float *) ((char *) tensor_data(src1) + (i1*nb10 + i11*nb11 + i12*nb12 + i13*nb13));
+            float * d  = (float *) ((char *)  tensor_data(dst) + (          i1*nb1 + i2*nb2 + i3*nb3));
 
             dequantize_row_q(s0, wdata, ne0);
             ggml_vec_mad_f32(ne0, d, wdata, *s1);
@@ -9387,11 +9387,11 @@ static void ggml_compute_forward_scale_f32(
     const size_t nb1 = dst->nb[1];
 
     for (int i1 = ir0; i1 < ir1; i1++) {
-        if (dst->data != src0->data) {
+        if (tensor_data(dst) != tensor_data(src0)) {
             // src0 is same shape as dst => same indices
-            memcpy((char *)dst->data + i1*nb1, (char *)src0->data + i1*nb01, nc * sizeof(float));
+            memcpy((char *)tensor_data(dst) + i1*nb1, (char *)tensor_data(src0) + i1*nb01, nc * sizeof(float));
         }
-        ggml_vec_scale_f32(nc, (float *) ((char *) dst->data + i1*nb1), v);
+        ggml_vec_scale_f32(nc, (float *) ((char *) tensor_data(dst) + i1*nb1), v);
     }
 }
 
@@ -9438,8 +9438,8 @@ static void ggml_compute_forward_set_f32(
             // memcpy needs to be synchronized across threads to avoid race conditions.
             // => do it in INIT phase
             memcpy(
-                ((char *)  dst->data),
-                ((char *) src0->data),
+                ((char *)  tensor_data(dst)),
+                ((char *) tensor_data(src0)),
                 ggml_nbytes(dst));
         }
         ggml_barrier(params->threadpool);
@@ -9481,8 +9481,8 @@ static void ggml_compute_forward_set_f32(
         const int i1 = (ir - i3*ne12*ne11 - i2*ne11);
 
         ggml_vec_cpy_f32(nc,
-                (float *) ((char *)  dst->data + i3*nb3  + i2*nb2  + i1*nb1  + offset),
-                (float *) ((char *) src1->data + i3*nb13 + i2*nb12 + i1*nb11));
+                (float *) ((char *)  tensor_data(dst) + i3*nb3  + i2*nb2  + i1*nb1  + offset),
+                (float *) ((char *) tensor_data(src1) + i3*nb13 + i2*nb12 + i1*nb11));
     }
 }
 
@@ -9509,8 +9509,8 @@ static void ggml_compute_forward_set_i32(
             // memcpy needs to be synchronized across threads to avoid race conditions.
             // => do it in INIT phase
             memcpy(
-                ((char *)  dst->data),
-                ((char *) src0->data),
+                ((char *)  tensor_data(dst)),
+                ((char *) tensor_data(src0)),
                 ggml_nbytes(dst));
         }
         ggml_barrier(params->threadpool);
@@ -9552,8 +9552,8 @@ static void ggml_compute_forward_set_i32(
         const int i1 = (ir - i3*ne12*ne11 - i2*ne11);
 
         ggml_vec_cpy_i32(nc,
-                (int32_t *) ((char *)  dst->data + i3*nb3  + i2*nb2  + i1*nb1  + offset),
-                (int32_t *) ((char *) src1->data + i3*nb13 + i2*nb12 + i1*nb11));
+                (int32_t *) ((char *)  tensor_data(dst) + i3*nb3  + i2*nb2  + i1*nb1  + offset),
+                (int32_t *) ((char *) tensor_data(src1) + i3*nb13 + i2*nb12 + i1*nb11));
     }
 }
 
@@ -9695,13 +9695,13 @@ static void ggml_compute_forward_get_rows_q(
         const int64_t i12 = i/(ne11*ne10);
         const int64_t i11 = (i - i12*ne11*ne10)/ne10;
         const int64_t i10 = (i - i12*ne11*ne10 - i11*ne10);
-        const int64_t i01 = *(int32_t *) ((char *) src1->data + i10*nb10 + i11*nb11 + i12*nb12);
+        const int64_t i01 = *(int32_t *) ((char *) tensor_data(src1) + i10*nb10 + i11*nb11 + i12*nb12);
 
         GGML_ASSERT(i01 >= 0 && i01 < ne01);
 
         dequantize_row_q(
-                (const void *) ((char *) src0->data + i01*nb01 + i11*nb02 + i12*nb03),
-                     (float *) ((char *)  dst->data + i10*nb1  + i11*nb2  + i12*nb3), nc);
+                (const void *) ((char *) tensor_data(src0) + i01*nb01 + i11*nb02 + i12*nb03),
+                     (float *) ((char *)  tensor_data(dst) + i10*nb1  + i11*nb2  + i12*nb3), nc);
     }
 }
 
@@ -9736,13 +9736,13 @@ static void ggml_compute_forward_get_rows_f16(
         const int64_t i12 = i/(ne11*ne10);
         const int64_t i11 = (i - i12*ne11*ne10)/ne10;
         const int64_t i10 = (i - i12*ne11*ne10 - i11*ne10);
-        const int64_t i01 = *(int32_t *) ((char *) src1->data + i10*nb10 + i11*nb11 + i12*nb12);
+        const int64_t i01 = *(int32_t *) ((char *) tensor_data(src1) + i10*nb10 + i11*nb11 + i12*nb12);
 
         GGML_ASSERT(i01 >= 0 && i01 < ne01);
 
         ggml_fp16_to_fp32_row(
-                (const void *) ((char *) src0->data + i01*nb01 + i11*nb02 + i12*nb03),
-                     (float *) ((char *)  dst->data + i10*nb1  + i11*nb2  + i12*nb3), nc);
+                (const void *) ((char *) tensor_data(src0) + i01*nb01 + i11*nb02 + i12*nb03),
+                     (float *) ((char *)  tensor_data(dst) + i10*nb1  + i11*nb2  + i12*nb3), nc);
     }
 }
 
@@ -9777,13 +9777,13 @@ static void ggml_compute_forward_get_rows_bf16(
         const int64_t i12 = i/(ne11*ne10);
         const int64_t i11 = (i - i12*ne11*ne10)/ne10;
         const int64_t i10 = (i - i12*ne11*ne10 - i11*ne10);
-        const int64_t i01 = *(int32_t *) ((char *) src1->data + i10*nb10 + i11*nb11 + i12*nb12);
+        const int64_t i01 = *(int32_t *) ((char *) tensor_data(src1) + i10*nb10 + i11*nb11 + i12*nb12);
 
         GGML_ASSERT(i01 >= 0 && i01 < ne01);
 
         ggml_bf16_to_fp32_row(
-                (const void *) ((char *) src0->data + i01*nb01 + i11*nb02 + i12*nb03),
-                     (float *) ((char *)  dst->data + i10*nb1  + i11*nb2  + i12*nb3), nc);
+                (const void *) ((char *) tensor_data(src0) + i01*nb01 + i11*nb02 + i12*nb03),
+                     (float *) ((char *)  tensor_data(dst) + i10*nb1  + i11*nb2  + i12*nb3), nc);
     }
 }
 
@@ -9818,13 +9818,13 @@ static void ggml_compute_forward_get_rows_f32(
         const int64_t i12 = i/(ne11*ne10);
         const int64_t i11 = (i - i12*ne11*ne10)/ne10;
         const int64_t i10 = (i - i12*ne11*ne10 - i11*ne10);
-        const int64_t i01 = *(int32_t *) ((char *) src1->data + i10*nb10 + i11*nb11 + i12*nb12);
+        const int64_t i01 = *(int32_t *) ((char *) tensor_data(src1) + i10*nb10 + i11*nb11 + i12*nb12);
 
         GGML_ASSERT(i01 >= 0 && i01 < ne01);
 
         ggml_vec_cpy_f32(nc,
-                (float *) ((char *)  dst->data + i10*nb1  + i11*nb2  + i12*nb3),
-                (float *) ((char *) src0->data + i01*nb01 + i11*nb02 + i12*nb03));
+                (float *) ((char *)  tensor_data(dst) + i10*nb1  + i11*nb2  + i12*nb3),
+                (float *) ((char *) tensor_data(src0) + i01*nb01 + i11*nb02 + i12*nb03));
     }
 }
 
@@ -9915,7 +9915,7 @@ static void ggml_compute_forward_get_rows_back_f32_f16(
 
     // ggml_compute_forward_dup_same_cont(params, opt0, dst);
 
-    memset(dst->data, 0, ggml_nbytes(dst));
+    memset(tensor_data(dst), 0, ggml_nbytes(dst));
 
     const int nc = src0->ne[0];
     const int nr = ggml_nelements(src1);
@@ -9924,11 +9924,11 @@ static void ggml_compute_forward_get_rows_back_f32_f16(
     GGML_ASSERT(src0->nb[0] == sizeof(ggml_fp16_t));
 
     for (int i = 0; i < nr; ++i) {
-        const int r = ((int32_t *) src1->data)[i];
+        const int r = ((int32_t *) tensor_data(src1))[i];
 
         for (int j = 0; j < nc; ++j) {
-            ggml_fp16_t v = ((ggml_fp16_t *) ((char *) src0->data + i*src0->nb[1]))[j];
-            ((float *) ((char *) dst->data + r*dst->nb[1]))[j] += GGML_FP16_TO_FP32(v);
+            ggml_fp16_t v = ((ggml_fp16_t *) ((char *) tensor_data(src0) + i*src0->nb[1]))[j];
+            ((float *) ((char *) tensor_data(dst) + r*dst->nb[1]))[j] += GGML_FP16_TO_FP32(v);
         }
     }
 }
@@ -9948,7 +9948,7 @@ static void ggml_compute_forward_get_rows_back_f32(
 
     // ggml_compute_forward_dup_same_cont(params, opt0, dst);
 
-    memset(dst->data, 0, ggml_nbytes(dst));
+    memset(tensor_data(dst), 0, ggml_nbytes(dst));
 
     const int nc = src0->ne[0];
     const int nr = ggml_nelements(src1);
@@ -9957,12 +9957,12 @@ static void ggml_compute_forward_get_rows_back_f32(
     GGML_ASSERT(src0->nb[0] == sizeof(float));
 
     for (int i = 0; i < nr; ++i) {
-        const int r = ((int32_t *) src1->data)[i];
+        const int r = ((int32_t *) tensor_data(src1))[i];
 
         ggml_vec_add_f32(nc,
-                (float *) ((char *)  dst->data + r*dst->nb[1]),
-                (float *) ((char *)  dst->data + r*dst->nb[1]),
-                (float *) ((char *) src0->data + i*src0->nb[1]));
+                (float *) ((char *)  tensor_data(dst) + r*dst->nb[1]),
+                (float *) ((char *)  tensor_data(dst) + r*dst->nb[1]),
+                (float *) ((char *) tensor_data(src0) + i*src0->nb[1]));
     }
 }
 
@@ -10034,8 +10034,8 @@ static void ggml_compute_forward_diag_f32(
     for (int i3 = 0; i3 < ne3; i3++) {
         for (int i2 = 0; i2 < ne2; i2++) {
             for (int i1 = 0; i1 < ne1; i1++) {
-                float * d = (float *)((char *)  dst->data + i3*nb3  + i2*nb2 + i1*nb1);
-                float * s = (float *)((char *) src0->data + i3*nb03 + i2*nb02);
+                float * d = (float *)((char *)  tensor_data(dst) + i3*nb3  + i2*nb2 + i1*nb1);
+                float * s = (float *)((char *) tensor_data(src0) + i3*nb03 + i2*nb02);
                 for (int i0 = 0; i0 < i1; i0++) {
                     d[i0] = 0;
                 }
@@ -10079,7 +10079,7 @@ static void ggml_compute_forward_diag_mask_f32(
     const int nth = params->nth;
 
     const int  n_past  = ((int32_t *) dst->op_params)[0];
-    const bool inplace = src0->data == dst->data;
+    const bool inplace = tensor_data(src0) == tensor_data(dst);
 
     GGML_ASSERT(n_past >= 0);
 
@@ -10090,8 +10090,8 @@ static void ggml_compute_forward_diag_mask_f32(
             GGML_ASSERT(ggml_nelements(dst) == ggml_nelements(src0));
             GGML_ASSERT(ggml_is_contiguous(dst) && ggml_is_contiguous(src0));
             memcpy(
-                ((char *)  dst->data),
-                ((char *) src0->data),
+                ((char *)  tensor_data(dst)),
+                ((char *) tensor_data(src0)),
                 ggml_nbytes(dst));
         }
         ggml_barrier(params->threadpool);
@@ -10111,7 +10111,7 @@ static void ggml_compute_forward_diag_mask_f32(
         for (int j = ith; j < nr; j += nth) {
             for (int i = n_past; i < nc; i++) {
                 if (i > n_past + j) {
-                    *(float *)((char *) dst->data + k*dst->nb[2] + j*dst->nb[1] + i*dst->nb[0]) = value;
+                    *(float *)((char *) tensor_data(dst) + k*dst->nb[2] + j*dst->nb[1] + i*dst->nb[0]) = value;
                 }
             }
         }
@@ -10208,12 +10208,12 @@ static void ggml_compute_forward_soft_max_f32(
         const uint32_t h = (i1/ne01)%ne02; // head
         const float slope = (max_bias > 0.0f) ? h < n_head_log2 ? powf(m0, h + 1) : powf(m1, 2*(h - n_head_log2) + 1) : 1.0f;
 
-        float * sp = (float *)((char *) src0->data + i1*src0->nb[1]);
-        float * dp = (float *)((char *)  dst->data +  i1*dst->nb[1]);
+        float * sp = (float *)((char *) tensor_data(src0) + i1*src0->nb[1]);
+        float * dp = (float *)((char *)  tensor_data(dst) +  i1*dst->nb[1]);
 
         // broadcast the mask across rows
-        ggml_fp16_t * mp_f16 = src1 ? (ggml_fp16_t *)((char *) src1->data) + (i1%ne01)*ne00 : NULL;
-        float       * mp_f32 = src1 ? (float       *)((char *) src1->data) + (i1%ne01)*ne00 : NULL;
+        ggml_fp16_t * mp_f16 = src1 ? (ggml_fp16_t *)((char *) tensor_data(src1)) + (i1%ne01)*ne00 : NULL;
+        float       * mp_f32 = src1 ? (float       *)((char *) tensor_data(src1)) + (i1%ne01)*ne00 : NULL;
 
         ggml_vec_cpy_f32  (nc, wp, sp);
         ggml_vec_scale_f32(nc, wp, scale);
@@ -10312,9 +10312,9 @@ static void ggml_compute_forward_soft_max_ext_back_f32(
     const int ir1 = MIN(ir0 + dr, nr);
 
     for (int i1 = ir0; i1 < ir1; i1++) {
-        float *dy = (float *)((char *) src0->data + i1*src0->nb[1]);
-        float *y  = (float *)((char *) src1->data + i1*src1->nb[1]);
-        float *dx = (float *)((char *) dst->data  + i1*dst->nb[1]);
+        float *dy = (float *)((char *) tensor_data(src0) + i1*src0->nb[1]);
+        float *y  = (float *)((char *) tensor_data(src1) + i1*src1->nb[1]);
+        float *dx = (float *)((char *) tensor_data(dst)  + i1*dst->nb[1]);
 
 #ifndef NDEBUG
         for (int i = 0; i < nc; ++i) {
@@ -10406,8 +10406,8 @@ static void ggml_compute_forward_clamp_f32(
     GGML_ASSERT(nb00 == sizeof(float));
 
     for (int j = ith; j < n; j += nth) {
-        float * dst_ptr  = (float *) ((char *)  dst->data + j*nb1);
-        float * src0_ptr = (float *) ((char *) src0->data + j*nb01);
+        float * dst_ptr  = (float *) ((char *)  tensor_data(dst) + j*nb1);
+        float * src0_ptr = (float *) ((char *) tensor_data(src0) + j*nb01);
 
         for (int i = 0; i < nc; i++) {
             dst_ptr[i] = MAX(MIN(src0_ptr[i], max), min);
@@ -10442,8 +10442,8 @@ static void ggml_compute_forward_clamp_f16(
     GGML_ASSERT(nb00 == sizeof(ggml_fp16_t));
 
     for (int j = ith; j < n; j += nth) {
-        ggml_fp16_t * dst_ptr  = (ggml_fp16_t *) ((char *)  dst->data + j*nb1);
-        ggml_fp16_t * src0_ptr = (ggml_fp16_t *) ((char *) src0->data + j*nb01);
+        ggml_fp16_t * dst_ptr  = (ggml_fp16_t *) ((char *)  tensor_data(dst) + j*nb1);
+        ggml_fp16_t * src0_ptr = (ggml_fp16_t *) ((char *) tensor_data(src0) + j*nb01);
 
         for (int i = 0; i < nc; i++) {
             float v = GGML_FP16_TO_FP32(src0_ptr[i]);
@@ -10675,7 +10675,7 @@ static void ggml_compute_forward_rope_f32(
     if (src2 != NULL) {
         GGML_ASSERT(src2->type == GGML_TYPE_F32);
         GGML_ASSERT(src2->ne[0] >= n_dims / 2);
-        freq_factors = (const float *) src2->data;
+        freq_factors = (const float *) tensor_data(src2);
     }
 
     // backward process uses inverse rotation by cos and sin.
@@ -10683,7 +10683,7 @@ static void ggml_compute_forward_rope_f32(
     // this essentially just switches the sign of sin.
     const float sin_sign = forward ? 1.0f : -1.0f;
 
-    const int32_t * pos = (const int32_t *) src1->data;
+    const int32_t * pos = (const int32_t *) tensor_data(src1);
 
     for (int64_t i3 = 0; i3 < ne3; i3++) { // batch
         for (int64_t i2 = 0; i2 < ne2; i2++) { // seq-len
@@ -10715,8 +10715,8 @@ static void ggml_compute_forward_rope_f32(
                             const float cos_theta = cache[i0 + 0];
                             const float sin_theta = cache[i0 + 1];
 
-                            const float * const src = (float *)((char *) src0->data + i3*nb03 + i2*nb02 + i1*nb01 + ic*nb00);
-                            float * dst_data  = (float *)((char *)  dst->data + i3*nb3  + i2*nb2  + i1*nb1  + ic*nb0);
+                            const float * const src = (float *)((char *) tensor_data(src0) + i3*nb03 + i2*nb02 + i1*nb01 + ic*nb00);
+                            float * dst_data  = (float *)((char *)  tensor_data(dst) + i3*nb3  + i2*nb2  + i1*nb1  + ic*nb0);
 
                             const float x0 = src[0];
                             const float x1 = src[n_dims];
@@ -10731,8 +10731,8 @@ static void ggml_compute_forward_rope_f32(
                             const float cos_theta = cache[i0 + 0];
                             const float sin_theta = cache[i0 + 1];
 
-                            const float * const src = (float *)((char *) src0->data + i3*nb03 + i2*nb02 + i1*nb01 + ic*nb00);
-                            float * dst_data  = (float *)((char *)  dst->data + i3*nb3  + i2*nb2  + i1*nb1  + ic*nb0);
+                            const float * const src = (float *)((char *) tensor_data(src0) + i3*nb03 + i2*nb02 + i1*nb01 + ic*nb00);
+                            float * dst_data  = (float *)((char *)  tensor_data(dst) + i3*nb3  + i2*nb2  + i1*nb1  + ic*nb0);
 
                             const float x0 = src[0];
                             const float x1 = src[n_dims/2];
@@ -10746,8 +10746,8 @@ static void ggml_compute_forward_rope_f32(
                         const float cos_theta = cache[i0 + 0];
                         const float sin_theta = cache[i0 + 1];
 
-                        const float * const src = (float *)((char *) src0->data + i3*nb03 + i2*nb02 + i1*nb01 + i0*nb00);
-                              float * dst_data  = (float *)((char *)  dst->data + i3*nb3  + i2*nb2  + i1*nb1  + i0*nb0);
+                        const float * const src = (float *)((char *) tensor_data(src0) + i3*nb03 + i2*nb02 + i1*nb01 + i0*nb00);
+                              float * dst_data  = (float *)((char *)  tensor_data(dst) + i3*nb3  + i2*nb2  + i1*nb1  + i0*nb0);
 
                         const float x0 = src[0];
                         const float x1 = src[1];
@@ -10764,8 +10764,8 @@ static void ggml_compute_forward_rope_f32(
                         const float cos_theta = cache[i0 + 0];
                         const float sin_theta = cache[i0 + 1];
 
-                        const float * const src = (float *)((char *) src0->data + i3*nb03 + i2*nb02 + i1*nb01 + ic*nb00);
-                        float * dst_data  = (float *)((char *)  dst->data + i3*nb3  + i2*nb2  + i1*nb1  + ic*nb0);
+                        const float * const src = (float *)((char *) tensor_data(src0) + i3*nb03 + i2*nb02 + i1*nb01 + ic*nb00);
+                        float * dst_data  = (float *)((char *)  tensor_data(dst) + i3*nb3  + i2*nb2  + i1*nb1  + ic*nb0);
 
                         const float x0 = src[0];
                         const float x1 = src[n_dims];
@@ -10776,8 +10776,8 @@ static void ggml_compute_forward_rope_f32(
                 } else {
                     // fill the remain channels with data from src tensor
                     for (int64_t i0 = n_dims; i0 < ne0; i0 += 2) {
-                        const float * const src = (float *)((char *) src0->data + i3*nb03 + i2*nb02 + i1*nb01 + i0*nb00);
-                        float * dst_data  = (float *)((char *)  dst->data + i3*nb3  + i2*nb2  + i1*nb1  + i0*nb0);
+                        const float * const src = (float *)((char *) tensor_data(src0) + i3*nb03 + i2*nb02 + i1*nb01 + i0*nb00);
+                        float * dst_data  = (float *)((char *)  tensor_data(dst) + i3*nb3  + i2*nb2  + i1*nb1  + i0*nb0);
 
                         dst_data[0] = src[0];
                         dst_data[1] = src[1];
@@ -10861,7 +10861,7 @@ static void ggml_compute_forward_rope_f16(
     if (src2 != NULL) {
         GGML_ASSERT(src2->type == GGML_TYPE_F32);
         GGML_ASSERT(src2->ne[0] >= n_dims / 2);
-        freq_factors = (const float *) src2->data;
+        freq_factors = (const float *) tensor_data(src2);
     }
 
     // backward process uses inverse rotation by cos and sin.
@@ -10869,7 +10869,7 @@ static void ggml_compute_forward_rope_f16(
     // this essentially just switches the sign of sin.
     const float sin_sign = forward ? 1.0f : -1.0f;
 
-    const int32_t * pos = (const int32_t *) src1->data;
+    const int32_t * pos = (const int32_t *) tensor_data(src1);
 
     for (int64_t i3 = 0; i3 < ne3; i3++) {
         for (int64_t i2 = 0; i2 < ne2; i2++) {
@@ -10901,8 +10901,8 @@ static void ggml_compute_forward_rope_f16(
                             const float cos_theta = cache[i0 + 0];
                             const float sin_theta = cache[i0 + 1];
 
-                            const ggml_fp16_t * const src = (ggml_fp16_t *)((char *) src0->data + i3*nb03 + i2*nb02 + i1*nb01 + ic*nb00);
-                            ggml_fp16_t * dst_data  = (ggml_fp16_t *)((char *)  dst->data + i3*nb3  + i2*nb2  + i1*nb1  + ic*nb0);
+                            const ggml_fp16_t * const src = (ggml_fp16_t *)((char *) tensor_data(src0) + i3*nb03 + i2*nb02 + i1*nb01 + ic*nb00);
+                            ggml_fp16_t * dst_data  = (ggml_fp16_t *)((char *)  tensor_data(dst) + i3*nb3  + i2*nb2  + i1*nb1  + ic*nb0);
 
                             const float x0 = GGML_FP16_TO_FP32(src[0]);
                             const float x1 = GGML_FP16_TO_FP32(src[n_dims]);
@@ -10917,8 +10917,8 @@ static void ggml_compute_forward_rope_f16(
                             const float cos_theta = cache[i0 + 0];
                             const float sin_theta = cache[i0 + 1];
 
-                            const ggml_fp16_t * const src = (ggml_fp16_t *)((char *) src0->data + i3*nb03 + i2*nb02 + i1*nb01 + ic*nb00);
-                            ggml_fp16_t * dst_data  = (ggml_fp16_t *)((char *)  dst->data + i3*nb3  + i2*nb2  + i1*nb1  + ic*nb0);
+                            const ggml_fp16_t * const src = (ggml_fp16_t *)((char *) tensor_data(src0) + i3*nb03 + i2*nb02 + i1*nb01 + ic*nb00);
+                            ggml_fp16_t * dst_data  = (ggml_fp16_t *)((char *)  tensor_data(dst) + i3*nb3  + i2*nb2  + i1*nb1  + ic*nb0);
 
                             const float x0 = GGML_FP16_TO_FP32(src[0]);
                             const float x1 = GGML_FP16_TO_FP32(src[n_dims/2]);
@@ -10932,8 +10932,8 @@ static void ggml_compute_forward_rope_f16(
                         const float cos_theta = cache[i0 + 0];
                         const float sin_theta = cache[i0 + 1];
 
-                        const ggml_fp16_t * const src = (ggml_fp16_t *)((char *) src0->data + i3*nb03 + i2*nb02 + i1*nb01 + i0*nb00);
-                              ggml_fp16_t * dst_data  = (ggml_fp16_t *)((char *)  dst->data + i3*nb3  + i2*nb2  + i1*nb1  + i0*nb0);
+                        const ggml_fp16_t * const src = (ggml_fp16_t *)((char *) tensor_data(src0) + i3*nb03 + i2*nb02 + i1*nb01 + i0*nb00);
+                              ggml_fp16_t * dst_data  = (ggml_fp16_t *)((char *)  tensor_data(dst) + i3*nb3  + i2*nb2  + i1*nb1  + i0*nb0);
 
                         const float x0 = GGML_FP16_TO_FP32(src[0]);
                         const float x1 = GGML_FP16_TO_FP32(src[1]);
@@ -10950,8 +10950,8 @@ static void ggml_compute_forward_rope_f16(
                         const float cos_theta = cache[i0 + 0];
                         const float sin_theta = cache[i0 + 1];
 
-                        const ggml_fp16_t * const src = (ggml_fp16_t *)((char *) src0->data + i3*nb03 + i2*nb02 + i1*nb01 + ic*nb00);
-                        ggml_fp16_t * dst_data  = (ggml_fp16_t *)((char *)  dst->data + i3*nb3  + i2*nb2  + i1*nb1  + ic*nb0);
+                        const ggml_fp16_t * const src = (ggml_fp16_t *)((char *) tensor_data(src0) + i3*nb03 + i2*nb02 + i1*nb01 + ic*nb00);
+                        ggml_fp16_t * dst_data  = (ggml_fp16_t *)((char *)  tensor_data(dst) + i3*nb3  + i2*nb2  + i1*nb1  + ic*nb0);
 
                         const float x0 = GGML_FP16_TO_FP32(src[0]);
                         const float x1 = GGML_FP16_TO_FP32(src[n_dims]);
@@ -10961,8 +10961,8 @@ static void ggml_compute_forward_rope_f16(
                     }
                 } else {
                     for (int64_t i0 = n_dims; i0 < ne0; i0 += 2) {
-                        const ggml_fp16_t * const src = (ggml_fp16_t *)((char *) src0->data + i3*nb03 + i2*nb02 + i1*nb01 + i0*nb00);
-                        ggml_fp16_t * dst_data  = (ggml_fp16_t *)((char *)  dst->data + i3*nb3  + i2*nb2  + i1*nb1  + i0*nb0);
+                        const ggml_fp16_t * const src = (ggml_fp16_t *)((char *) tensor_data(src0) + i3*nb03 + i2*nb02 + i1*nb01 + i0*nb00);
+                        ggml_fp16_t * dst_data  = (ggml_fp16_t *)((char *)  tensor_data(dst) + i3*nb3  + i2*nb2  + i1*nb1  + i0*nb0);
 
                         dst_data[0] = src[0];
                         dst_data[1] = src[1];
@@ -11051,7 +11051,7 @@ static void ggml_compute_forward_conv_transpose_1d_f16_f32(
 
             for (int64_t i02 = 0; i02 < ne02; i02++) {
                 for (int64_t i01 = 0; i01 < ne01; i01++) {
-                    const ggml_fp16_t * const src = (ggml_fp16_t *)((char *) src0->data + i02*nb02 + i01*nb01);
+                    const ggml_fp16_t * const src = (ggml_fp16_t *)((char *) tensor_data(src0) + i02*nb02 + i01*nb01);
                     ggml_fp16_t * dst_data = wdata + i01*ne00*ne02;
                     for (int64_t i00 = 0; i00 < ne00; i00++) {
                         dst_data[i00*ne02 + i02] = src[i00];
@@ -11066,7 +11066,7 @@ static void ggml_compute_forward_conv_transpose_1d_f16_f32(
             ggml_fp16_t * dst_data = wdata;
 
             for (int64_t i11 = 0; i11 < ne11; i11++) {
-                const float * const src = (float *)((char *) src1->data + i11*nb11);
+                const float * const src = (float *)((char *) tensor_data(src1) + i11*nb11);
                 for (int64_t i10 = 0; i10 < ne10; i10++) {
                     dst_data[i10*ne11 + i11] = GGML_FP32_TO_FP16(src[i10]);
                 }
@@ -11074,7 +11074,7 @@ static void ggml_compute_forward_conv_transpose_1d_f16_f32(
         }
 
         // need to zero dst since we are accumulating into it
-        memset(dst->data, 0, ggml_nbytes(dst));
+        memset(tensor_data(dst), 0, ggml_nbytes(dst));
     }
     ggml_barrier(params->threadpool);
 
@@ -11094,7 +11094,7 @@ static void ggml_compute_forward_conv_transpose_1d_f16_f32(
     ggml_fp16_t * const wdata_src = wdata + nk;
 
     for (int i1 = ir0; i1 < ir1; i1++) {
-        float * dst_data = (float *)((char *) dst->data + i1*nb1);
+        float * dst_data = (float *)((char *) tensor_data(dst) + i1*nb1);
         ggml_fp16_t * wdata_kernel = wdata + i1*ne02*ne00;
         for (int i10 = 0; i10 < ne10; i10++) {
             const int i1n = i10*ne11;
@@ -11139,7 +11139,7 @@ static void ggml_compute_forward_conv_transpose_1d_f32(
 
             for (int64_t i02 = 0; i02 < ne02; i02++) {
                 for (int64_t i01 = 0; i01 < ne01; i01++) {
-                    const float * const src = (float *)((char *) src0->data + i02*nb02 + i01*nb01);
+                    const float * const src = (float *)((char *) tensor_data(src0) + i02*nb02 + i01*nb01);
                     float * dst_data = wdata + i01*ne00*ne02;
                     for (int64_t i00 = 0; i00 < ne00; i00++) {
                         dst_data[i00*ne02 + i02] = src[i00];
@@ -11154,7 +11154,7 @@ static void ggml_compute_forward_conv_transpose_1d_f32(
             float * dst_data = wdata;
 
             for (int64_t i11 = 0; i11 < ne11; i11++) {
-                const float * const src = (float *)((char *) src1->data + i11*nb11);
+                const float * const src = (float *)((char *) tensor_data(src1) + i11*nb11);
                 for (int64_t i10 = 0; i10 < ne10; i10++) {
                     dst_data[i10*ne11 + i11] = src[i10];
                 }
@@ -11162,7 +11162,7 @@ static void ggml_compute_forward_conv_transpose_1d_f32(
         }
 
         // need to zero dst since we are accumulating into it
-        memset(dst->data, 0, ggml_nbytes(dst));
+        memset(tensor_data(dst), 0, ggml_nbytes(dst));
     }
     ggml_barrier(params->threadpool);
 
@@ -11182,7 +11182,7 @@ static void ggml_compute_forward_conv_transpose_1d_f32(
     float * const wdata_src = wdata + nk;
 
     for (int i1 = ir0; i1 < ir1; i1++) {
-        float * dst_data = (float *)((char *) dst->data + i1*nb1);
+        float * dst_data = (float *)((char *) tensor_data(dst) + i1*nb1);
         float * wdata_kernel = wdata + i1*ne02*ne00;
         for (int i10 = 0; i10 < ne10; i10++) {
             const int i1n = i10*ne11;
@@ -11264,7 +11264,7 @@ static void ggml_compute_forward_im2col_f32(
 
     // im2col: [N, IC, IH, IW] => [N, OH, OW, IC*KH*KW]
     {
-        float * const wdata = (float *) dst->data;
+        float * const wdata = (float *) tensor_data(dst);
 
         for (int64_t in = 0; in < N; in++) {
             for (int64_t ioh = 0; ioh < OH; ioh++) { // 1
@@ -11273,7 +11273,7 @@ static void ggml_compute_forward_im2col_f32(
 
                         // micro kernel
                         float * dst_data = wdata + (in*OH*OW + ioh*OW + iow)*(IC*KH*KW); // [IC, KH, KW]
-                        const float * const src_data = (float *)((char *) src1->data + in*ofs0 + iic*ofs1); // [IH, IW]
+                        const float * const src_data = (float *)((char *) tensor_data(src1) + in*ofs0 + iic*ofs1); // [IH, IW]
 
                         for (int64_t ikh = 0; ikh < KH; ikh++) {  // 1
                             for (int64_t ikw = 0; ikw < KW; ikw++) {
@@ -11342,7 +11342,7 @@ static void ggml_compute_forward_im2col_f16(
 
     // im2col: [N, IC, IH, IW] => [N, OH, OW, IC*KH*KW]
     {
-        ggml_fp16_t * const wdata = (ggml_fp16_t *) dst->data;
+        ggml_fp16_t * const wdata = (ggml_fp16_t *) tensor_data(dst);
 
         for (int64_t in = 0; in < N; in++) {
             for (int64_t ioh = 0; ioh < OH; ioh++) { // 1
@@ -11351,7 +11351,7 @@ static void ggml_compute_forward_im2col_f16(
 
                         // micro kernel
                         ggml_fp16_t * dst_data = wdata + (in*OH*OW + ioh*OW + iow)*(IC*KH*KW); // [IC, KH, KW]
-                        const float * const src_data = (float *)((char *) src1->data + in*ofs0 + iic*ofs1); // [IH, IW]
+                        const float * const src_data = (float *)((char *) tensor_data(src1) + in*ofs0 + iic*ofs1); // [IH, IW]
 
                         for (int64_t ikh = 0; ikh < KH; ikh++) {  // 1
                             for (int64_t ikw = 0; ikw < KW; ikw++) {
@@ -11435,7 +11435,7 @@ static void ggml_compute_forward_im2col_back_f32(
 
     // im2col: [N, IC, IH, IW] => [N, OH, OW, IC*KH*KW]
     {
-        float * const wdata = (float *) dst->data;
+        float * const wdata = (float *) tensor_data(dst);
 
         for (int64_t in = 0; in < N; in++) {
             for (int64_t iic = ith; iic < IC; iic += nth) {
@@ -11472,7 +11472,7 @@ static void ggml_compute_forward_im2col_back_f32(
                                     continue;
                                 }
 
-                                const float * const grad_in = (const float *) src0->data
+                                const float * const grad_in = (const float *) tensor_data(src0)
                                     + (in*OH*OW + ioh*OW + iow)*(IC*KH*KW); // [IC, KH, KW]
                                 grad += grad_in[iic*(KH*KW) + ikh*KW + ikw];
                             }
@@ -11518,7 +11518,7 @@ static void ggml_compute_forward_conv_transpose_2d(
 
             for (int64_t i03 = 0; i03 < ne03; i03++) {
                 for (int64_t i02 = 0; i02 < ne02; i02++) {
-                    const ggml_fp16_t * const src = (ggml_fp16_t *)((char *) src0->data + i03*nb03 + i02*nb02);
+                    const ggml_fp16_t * const src = (ggml_fp16_t *)((char *) tensor_data(src0) + i03*nb03 + i02*nb02);
                     ggml_fp16_t * dst_data = wdata + i02*ne01*ne00*ne03;
                     for (int64_t i01 = 0; i01 < ne01; i01++) {
                         for (int64_t i00 = 0; i00 < ne00; i00++) {
@@ -11534,7 +11534,7 @@ static void ggml_compute_forward_conv_transpose_2d(
             ggml_fp16_t * const wdata = (ggml_fp16_t *) params->wdata + nk;
             for (int i12 = 0; i12 < ne12; i12++) {
                 for (int i11 = 0; i11 < ne11; i11++) {
-                    const float * const src = (float *)((char *) src1->data + i12*nb12 + i11*nb11);
+                    const float * const src = (float *)((char *) tensor_data(src1) + i12*nb12 + i11*nb11);
                     ggml_fp16_t * dst_data = wdata + i11*ne10*ne12;
                     for (int i10 = 0; i10 < ne10; i10++) {
                         dst_data[i10*ne12 + i12] = GGML_FP32_TO_FP16(src[i10]);
@@ -11543,7 +11543,7 @@ static void ggml_compute_forward_conv_transpose_2d(
             }
         }
 
-        memset(dst->data, 0, ggml_nbytes(dst));
+        memset(tensor_data(dst), 0, ggml_nbytes(dst));
     }
     ggml_barrier(params->threadpool);
 
@@ -11563,7 +11563,7 @@ static void ggml_compute_forward_conv_transpose_2d(
     ggml_fp16_t * const wdata_src = wdata + nk;
 
     for (int i2 = ip0; i2 < ip1; i2++) { // Cout
-        float * dst_data = (float *)((char *) dst->data + i2*nb2);
+        float * dst_data = (float *)((char *) tensor_data(dst) + i2*nb2);
         ggml_fp16_t * wdata_kernel = wdata + i2*ne01*ne00*ne03;
         for (int i11 = 0; i11 < ne11; i11++) {
             for (int i10 = 0; i10 < ne10; i10++) {
@@ -11598,9 +11598,9 @@ static void ggml_compute_forward_pool_1d_sk_p0(
         return;
     }
 
-    const char * cdata = (const char *)src->data;
+    const char * cdata = (const char *)tensor_data(src);
     const char * const data_end = cdata + ggml_nbytes(src);
-    float * drow = (float *)dst->data;
+    float * drow = (float *)tensor_data(dst);
 
     const int64_t rs = dst->ne[0];
 
@@ -11673,14 +11673,14 @@ static void ggml_compute_forward_pool_2d(
     const int s1 = opts[4];
     const int p0 = opts[5];
     const int p1 = opts[6];
-    const char * cdata = (const char*)src->data;
+    const char * cdata = (const char*)tensor_data(src);
     const char * const data_end = cdata + ggml_nbytes(src);
 
     const int64_t px = dst->ne[0];
     const int64_t py = dst->ne[1];
     const int64_t pa = px * py;
 
-    float * dplane = (float *)dst->data;
+    float * dplane = (float *)tensor_data(dst);
 
     const int ka = k0 * k1;
     const int offset0 = -p0;
@@ -11751,8 +11751,8 @@ static void ggml_compute_forward_pool_2d_back(
     const int p0 = opts[5];
     const int p1 = opts[6];
 
-    char       * cdata  = (char       *) dst->data;
-    const char * cdataf = (const char *) dstf->data;
+    char       * cdata  = (char       *) tensor_data(dst);
+    const char * cdataf = (const char *) tensor_data(dstf);
     const char * const data_end = cdata + ggml_nbytes(dst);
 
     GGML_ASSERT(params->ith == 0);
@@ -11762,7 +11762,7 @@ static void ggml_compute_forward_pool_2d_back(
     const int64_t py = src->ne[1];
     const int64_t pa = px * py;
 
-    const float * splane = (const float *) src->data;
+    const float * splane = (const float *) tensor_data(src);
 
     const int ka = k0 * k1;
     const int offset0 = -p0;
@@ -11880,8 +11880,8 @@ static void ggml_compute_forward_upscale_f32(
                 for (int64_t i0 = 0; i0 < ne0; i0++) {
                     const int64_t i00 = i0 / sf0;
 
-                    const float * x = (float *)((char *) src0->data + i00*nb00 + i01*nb01 + i02*nb02 + i03*nb03);
-                          float * y = (float *)((char *)  dst->data +  i0*nb0  +  i1*nb1  +  i2*nb2  +  i3*nb3);
+                    const float * x = (float *)((char *) tensor_data(src0) + i00*nb00 + i01*nb01 + i02*nb02 + i03*nb03);
+                          float * y = (float *)((char *)  tensor_data(dst) +  i0*nb0  +  i1*nb1  +  i2*nb2  +  i3*nb3);
 
                     *y = *x;
                 }
@@ -11925,7 +11925,7 @@ static void ggml_compute_forward_pad_f32(
 
     GGML_TENSOR_UNARY_OP_LOCALS
 
-    float * dst_ptr = (float *) dst->data;
+    float * dst_ptr = (float *) tensor_data(dst);
 
     // TODO: optimize
 
@@ -11935,7 +11935,7 @@ static void ggml_compute_forward_pad_f32(
                 for (int64_t i3 = 0; i3 < ne3; ++i3) {
                     const int64_t dst_idx = i3*(ne0*ne1*ne2) + i2*(ne0*ne1) + i1*ne0 + i0;
 
-                    const float * src_ptr = (const float *)((char *) src0->data + i3*nb03 + i2*nb02 + i1*nb01 + i0*nb00);
+                    const float * src_ptr = (const float *)((char *) tensor_data(src0) + i3*nb03 + i2*nb02 + i1*nb01 + i0*nb00);
 
                     if (i0 < ne00 && i1 < ne01 && i2 < ne02 && i3 < ne03) {
                         dst_ptr[dst_idx] = *src_ptr;
@@ -11989,10 +11989,10 @@ static void ggml_compute_forward_pad_reflect_1d(
     for (int64_t i3 = 0; i3 < ne3; i3++) {
         for (int64_t i2 = 0; i2 < ne2; i2++) {
             for (int64_t i1 = ith; i1 < ne1; i1 += nth) {
-                float * left  = (float *) ((char *) dst->data + i3*nb3 + i2*nb2 + i1*nb1 +         p0*nb0);
-                float * right = (float *) ((char *) dst->data + i3*nb3 + i2*nb2 + i1*nb1 + (ne0-p1-1)*nb0);
+                float * left  = (float *) ((char *) tensor_data(dst) + i3*nb3 + i2*nb2 + i1*nb1 +         p0*nb0);
+                float * right = (float *) ((char *) tensor_data(dst) + i3*nb3 + i2*nb2 + i1*nb1 + (ne0-p1-1)*nb0);
 
-                ggml_vec_cpy_f32(ne00, left, (float *) ((char *) src0->data + i3*nb03 + i2*nb02 + i1*nb01));
+                ggml_vec_cpy_f32(ne00, left, (float *) ((char *) tensor_data(src0) + i3*nb03 + i2*nb02 + i1*nb01));
 
                 for (int i0 = 1; i0 <= p0; i0++) { left[-i0] = left[i0];   }
                 for (int i0 = 1; i0 <= p1; i0++) { right[i0] = right[-i0]; }
@@ -12022,7 +12022,7 @@ static void ggml_compute_forward_arange_f32(
 
     for (int64_t i = ith; i < steps; i+= nth) {
         float value = start + step * i;
-        ((float *)dst->data)[i] = value;
+        ((float *)tensor_data(dst))[i] = value;
     }
 }
 
@@ -12060,9 +12060,9 @@ static void ggml_compute_forward_timestep_embedding_f32(
     int half = dim / 2;
 
     for (int64_t i = 0; i < ne00; i++) {
-        float * embed_data = (float *)((char *)  dst->data +  i*nb1);
+        float * embed_data = (float *)((char *)  tensor_data(dst) +  i*nb1);
         for (int64_t j = ith; j < half; j += nth) {
-            float timestep = ((float *)src0->data)[i];
+            float timestep = ((float *)tensor_data(src0))[i];
             float freq = (float)expf(-logf(max_period) * j / half);
             float arg = timestep * freq;
             embed_data[j] = cosf(arg);
@@ -12112,8 +12112,8 @@ static void ggml_compute_forward_argsort_f32(
     enum ggml_sort_order order = (enum ggml_sort_order) ggml_get_op_params_i32(dst, 0);
 
     for (int64_t i = ith; i < nr; i += nth) {
-        int32_t * dst_data = (int32_t *)((char *) dst->data + i*nb1);
-        const float * src_data = (float *)((char *) src0->data + i*nb01);
+        int32_t * dst_data = (int32_t *)((char *) tensor_data(dst) + i*nb1);
+        const float * src_data = (float *)((char *) tensor_data(src0) + i*nb01);
 
         for (int64_t j = 0; j < ne0; j++) {
             dst_data[j] = j;
@@ -12266,7 +12266,7 @@ static void ggml_compute_forward_flash_attn_ext_f16(
             memset(VKQ32, 0, D*sizeof(float));
         }
 
-        const ggml_fp16_t * mp = mask ? (ggml_fp16_t *)((char *) mask->data + iq1*mask->nb[1]) : NULL;
+        const ggml_fp16_t * mp = mask ? (ggml_fp16_t *)((char *) tensor_data(mask) + iq1*mask->nb[1]) : NULL;
 
         // k indices
         const int ik3 = iq3 / rk3;
@@ -12276,7 +12276,7 @@ static void ggml_compute_forward_flash_attn_ext_f16(
         const int iv3 = iq3 / rv3;
         const int iv2 = iq2 / rv2;
 
-        const float * pq = (const float *) ((char *) q->data + (iq1*nbq1 + iq2*nbq2 + iq3*nbq3));
+        const float * pq = (const float *) ((char *) tensor_data(q) + (iq1*nbq1 + iq2*nbq2 + iq3*nbq3));
         q_to_vec_dot(pq, Q_q, D);
 
         // online softmax / attention
@@ -12290,7 +12290,7 @@ static void ggml_compute_forward_flash_attn_ext_f16(
 
             float s; // KQ value
 
-            const char * k_data = (const char *) k->data + ( ic*nbk1 + ik2*nbk2 + ik3*nbk3);
+            const char * k_data = (const char *) tensor_data(k) + ( ic*nbk1 + ik2*nbk2 + ik3*nbk3);
             kq_vec_dot(D, &s, 0, k_data, 0, Q_q, 0, 1);
 
             s = s*scale; // scale KQ value
@@ -12306,7 +12306,7 @@ static void ggml_compute_forward_flash_attn_ext_f16(
             float ms = 1.0f; // upon new higher max val, scale VKQ and KQ sum with this value
             float vs = 1.0f; // post-softmax KQ value, expf(s - M)
 
-            const char * v_data = ((const char *) v->data + (ic*nbv1 + iv2*nbv2 + iv3*nbv3));
+            const char * v_data = ((const char *) tensor_data(v) + (ic*nbv1 + iv2*nbv2 + iv3*nbv3));
 
             if (v->type == GGML_TYPE_F16) {
                 if (s > M) {
@@ -12364,7 +12364,7 @@ static void ggml_compute_forward_flash_attn_ext_f16(
         //memcpy((char *) dst->data + (i1*nb1 + i2*nb2 + i3*nb3), V, nev0*sizeof(float));
 
         // permute(0, 2, 1, 3)
-        memcpy((char *) dst->data + (i3*ne2*ne1 + i2 + i1*ne1)*nb1, VKQ32, nb1);
+        memcpy((char *) tensor_data(dst) + (i3*ne2*ne1 + i2 + i1*ne1)*nb1, VKQ32, nb1);
     }
 }
 
@@ -12448,7 +12448,7 @@ static void ggml_compute_forward_flash_attn_back_f32(
     GGML_ASSERT(nb2 <= nb3);
 
     if (ith == 0) {
-        memset(dst->data, 0, nb0*ne0*ne1*ne2*ne3);
+        memset(tensor_data(dst), 0, nb0*ne0*ne1*ne2*ne3);
     }
     ggml_barrier(params->threadpool);
 
@@ -12463,9 +12463,9 @@ static void ggml_compute_forward_flash_attn_back_f32(
     const size_t offs_k = offs_q + GGML_PAD(elem_q * tsize, GGML_MEM_ALIGN);
     const size_t offs_v = offs_k + GGML_PAD(elem_k * tsize, GGML_MEM_ALIGN);
 
-    void * grad_q = (char *) dst->data;
-    void * grad_k = (char *) dst->data + offs_k;
-    void * grad_v = (char *) dst->data + offs_v;
+    void * grad_q = (char *) tensor_data(dst);
+    void * grad_k = (char *) tensor_data(dst) + offs_k;
+    void * grad_v = (char *) tensor_data(dst) + offs_v;
 
     const size_t nbgq1 = nb0*neq0;
     const size_t nbgq2 = nb0*neq0*neq1;
@@ -12535,8 +12535,8 @@ static void ggml_compute_forward_flash_attn_back_f32(
 
                     ggml_vec_dot_f32(neq0,
                             S + i1, 0,
-                            (float *) ((char *) k->data + (ik1*nbk1 + ik2*nbk2 + ik3*nbk3)), 0,
-                            (float *) ((char *) q->data + (iq1*nbq1 + iq2*nbq2 + iq3*nbq3)), 0, 1);
+                            (float *) ((char *) tensor_data(k) + (ik1*nbk1 + ik2*nbk2 + ik3*nbk3)), 0,
+                            (float *) ((char *) tensor_data(q) + (iq1*nbq1 + iq2*nbq2 + iq3*nbq3)), 0, 1);
                 }
 
                 // scale
@@ -12644,8 +12644,8 @@ static void ggml_compute_forward_flash_attn_back_f32(
                 for (int64_t ic = 0; ic < D; ++ic) {
                     ggml_vec_mad_f32(masked_begin,
                             S,
-                             (float *) ((char *) v->data + (          ic*nbv1  + iv2*nbv2 + iv3*nbv3)),
-                            *(float *) ((char *) d->data + (ic*nbd0 + id1*nbd1 + id2*nbd2 + id3*nbd3)));
+                             (float *) ((char *) tensor_data(v) + (          ic*nbv1  + iv2*nbv2 + iv3*nbv3)),
+                            *(float *) ((char *) tensor_data(d) + (ic*nbd0 + id1*nbd1 + id2*nbd2 + id3*nbd3)));
                 }
 
                 // S = SM * (S - dot(SM, S))
@@ -12674,7 +12674,7 @@ static void ggml_compute_forward_flash_attn_back_f32(
                 for (int64_t ic = 0; ic < masked_begin; ++ic) {
                     ggml_vec_mad_f32(D,
                             (float *) ((char *) grad_q  + (iq1*nbgq1 + iq2*nbgq2  + iq3*nbgq3)),
-                            (float *) ((char *) k->data + (ic*nbk1   + ik2*nbk2   + ik3*nbk3)),
+                            (float *) ((char *) tensor_data(k) + (ic*nbk1   + ik2*nbk2   + ik3*nbk3)),
                             S[ic]);
                 }
 
@@ -12686,7 +12686,7 @@ static void ggml_compute_forward_flash_attn_back_f32(
                 for (int64_t ic = 0; ic < masked_begin; ++ic) {
                     ggml_vec_mad_f32(D,
                             (float *) ((char *) grad_k  + (ic*nbgk1  + ik2*nbgk2  + ik3*nbgk3)),
-                            (float *) ((char *) q->data + (iq1*nbq1  + iq2*nbq2   + iq3*nbq3)),
+                            (float *) ((char *) tensor_data(q) + (iq1*nbq1  + iq2*nbq2   + iq3*nbq3)),
                             S[ic]);
                 }
 
@@ -12699,7 +12699,7 @@ static void ggml_compute_forward_flash_attn_back_f32(
                     ggml_vec_mad_f32(masked_begin,
                             (float *) ((char *) grad_v   + (          ic*nbgv1 + iv2*nbgv2 + iv3*nbgv3)),
                             SM,
-                            *(float *) ((char *) d->data + (ic*nbd0 + id1*nbd1 + id2*nbd2  + id3*nbd3)));
+                            *(float *) ((char *) tensor_data(d) + (ic*nbd0 + id1*nbd1 + id2*nbd2  + id3*nbd3)));
                 }
             }
         }
@@ -12759,9 +12759,9 @@ static void ggml_compute_forward_ssm_conv_f32(
         for (int i2 = 0; i2 < n_t; ++i2) {
             // {d_conv - 1 + n_t, d_inner, n_seqs}
             // sliding window
-            const float * s = (const float *) ((const char *) src0->data + ir0*(src0->nb[1]) + i2*(src0->nb[0]) + i3*(src0->nb[2])); // {d_conv, d_inner, n_s}
-            const float * c = (const float *) ((const char *) src1->data + ir0*(src1->nb[1])); // {d_conv, d_inner}
-            float * x = (float *) ((char *) dst->data + ir0*(dst->nb[0]) + i2*(dst->nb[1]) + i3*(dst->nb[2])); // {d_inner, n_t, n_s}
+            const float * s = (const float *) ((const char *) tensor_data(src0) + ir0*(src0->nb[1]) + i2*(src0->nb[0]) + i3*(src0->nb[2])); // {d_conv, d_inner, n_s}
+            const float * c = (const float *) ((const char *) tensor_data(src1) + ir0*(src1->nb[1])); // {d_conv, d_inner}
+            float * x = (float *) ((char *) tensor_data(dst) + ir0*(dst->nb[0]) + i2*(dst->nb[1]) + i3*(dst->nb[2])); // {d_inner, n_t, n_s}
 
             // TODO: transpose the output for smaller strides for big batches?
             // d_inner
@@ -12839,14 +12839,14 @@ static void ggml_compute_forward_ssm_scan_f32(
 
     for (int i3 = 0; i3 < n_s; ++i3) {
         for (int i2 = 0; i2 < n_t; ++i2) {
-            const float * s0 = (const float *) ((const char *) src0->data + ir0*(src0->nb[1]) + i3*(src0->nb[2])); // {d_state, d_inner, n_s}
-            const float * x  = (const float *) ((const char *) src1->data + ir0*(src1->nb[0]) + i2*(src1->nb[1]) + i3*(src1->nb[2])); // {d_inner, n_t, n_s}
-            const float * dt = (const float *) ((const char *) src2->data + ir0*(src2->nb[0]) + i2*(src2->nb[1]) + i3*(src2->nb[2])); // {d_inner, n_t, n_s}
-            const float * A  = (const float *) ((const char *) src3->data + ir0*(src3->nb[1])); // {d_state, d_inner}
-            const float * B  = (const float *) ((const char *) src4->data +  i2*(src4->nb[1]) + i3*(src4->nb[2])); // {d_state, n_t, n_s}
-            const float * C  = (const float *) ((const char *) src5->data +  i2*(src5->nb[1]) + i3*(src5->nb[2])); // {d_state, n_t, n_s}
-                  float * y  = (      float *) ((      char *) dst->data  + ir0*(src1->nb[0]) + i2*(src1->nb[1]) + i3*(src1->nb[2])); // {d_inner, n_t, n_s}
-                  float * s  = (      float *) ((      char *) dst->data  + ir0*(src0->nb[1]) + i3*(src0->nb[2]) +     src1->nb[3]);  // {d_state, d_inner, n_s}
+            const float * s0 = (const float *) ((const char *) tensor_data(src0) + ir0*(src0->nb[1]) + i3*(src0->nb[2])); // {d_state, d_inner, n_s}
+            const float * x  = (const float *) ((const char *) tensor_data(src1) + ir0*(src1->nb[0]) + i2*(src1->nb[1]) + i3*(src1->nb[2])); // {d_inner, n_t, n_s}
+            const float * dt = (const float *) ((const char *) tensor_data(src2) + ir0*(src2->nb[0]) + i2*(src2->nb[1]) + i3*(src2->nb[2])); // {d_inner, n_t, n_s}
+            const float * A  = (const float *) ((const char *) tensor_data(src3) + ir0*(src3->nb[1])); // {d_state, d_inner}
+            const float * B  = (const float *) ((const char *) tensor_data(src4) +  i2*(src4->nb[1]) + i3*(src4->nb[2])); // {d_state, n_t, n_s}
+            const float * C  = (const float *) ((const char *) tensor_data(src5) +  i2*(src5->nb[1]) + i3*(src5->nb[2])); // {d_state, n_t, n_s}
+                  float * y  = (      float *) ((      char *) tensor_data(dst)  + ir0*(src1->nb[0]) + i2*(src1->nb[1]) + i3*(src1->nb[2])); // {d_inner, n_t, n_s}
+                  float * s  = (      float *) ((      char *) tensor_data(dst)  + ir0*(src0->nb[1]) + i3*(src0->nb[2]) +     src1->nb[3]);  // {d_state, d_inner, n_s}
 
             // use the output as the source for the next token-wise iterations
             if (i2 > 0) { s0 = s; }
@@ -12921,9 +12921,9 @@ static void ggml_compute_forward_win_part_f32(
                         const int64_t j =                  i02*ne01*ne00 + i01*ne00 + i00;
 
                         if (py*w + i2 >= ne02 || px*w + i1 >= ne01) {
-                            ((float *) dst->data)[i] = 0.0f;
+                            ((float *) tensor_data(dst))[i] = 0.0f;
                         } else {
-                            ((float *) dst->data)[i] = ((float *) src0->data)[j];
+                            ((float *) tensor_data(dst))[i] = ((float *) tensor_data(src0))[j];
                         }
                     }
                 }
@@ -12987,7 +12987,7 @@ static void ggml_compute_forward_win_unpart_f32(
                 const int64_t i = (ip2*npx + ip1)*ne02*ne01*ne00 + i02*ne01*ne00 + i01*ne00 + i00;
                 const int64_t j =                                  i2*ne1*ne0    + i1*ne0   + i0;
 
-                ((float *) dst->data)[j] = ((float *) src0->data)[i];
+                ((float *) tensor_data(dst))[j] = ((float *) tensor_data(src0))[i];
             }
         }
     }
@@ -13098,8 +13098,8 @@ static void ggml_compute_forward_get_rel_pos_f16(
 
     const int64_t w = ne1;
 
-    ggml_fp16_t * src0_data = (ggml_fp16_t *) src0->data;
-    ggml_fp16_t * dst_data  = (ggml_fp16_t *) dst->data;
+    ggml_fp16_t * src0_data = (ggml_fp16_t *) tensor_data(src0);
+    ggml_fp16_t * dst_data  = (ggml_fp16_t *) tensor_data(dst);
 
     for (int64_t i2 = 0; i2 < ne2; ++i2) {
         for (int64_t i1 = 0; i1 < ne1; ++i1) {
@@ -13143,15 +13143,15 @@ static void ggml_compute_forward_add_rel_pos_f32(
     const bool inplace = (bool) ((int32_t *) dst->op_params)[0];
     if (!inplace) {
         if (params->ith == 0) {
-            memcpy((char *) dst->data, (char *) src0->data, ggml_nbytes(dst));
+            memcpy((char *) tensor_data(dst), (char *) tensor_data(src0), ggml_nbytes(dst));
         }
         ggml_barrier(params->threadpool);
     }
     // ref: https://github.com/facebookresearch/segment-anything/blob/main/segment_anything/modeling/image_encoder.py#L357-L359
 
-    float * src1_data = (float *) src1->data;
-    float * src2_data = (float *) src2->data;
-    float * dst_data  = (float *) dst->data;
+    float * src1_data = (float *) tensor_data(src1);
+    float * src2_data = (float *) tensor_data(src2);
+    float * dst_data  = (float *) tensor_data(dst);
 
     const int64_t ne10 = src1->ne[0];
     const int64_t ne11 = src1->ne[1];
@@ -13222,8 +13222,8 @@ static void ggml_compute_forward_rwkv_wkv6_f32(
     const int64_t n_seqs = dst->src[5]->ne[1];
     const int64_t head_size = C / HEADS;
 
-    float * dst_data = (float *) dst->data;
-    float * state = ((float *) dst->data) + C * T;
+    float * dst_data = (float *) tensor_data(dst);
+    float * state = ((float *) tensor_data(dst)) + C * T;
 
     const int ith = params->ith;
     const int nth = params->nth;
@@ -13236,11 +13236,11 @@ static void ggml_compute_forward_rwkv_wkv6_f32(
     const int h_end = ((HEADS * (ith + 1)) / nth < HEADS) ?
                 (HEADS * (ith + 1)) / nth : HEADS;
 
-    float * k =          (float *) dst->src[0]->data;
-    float * v =          (float *) dst->src[1]->data;
-    float * r =          (float *) dst->src[2]->data;
-    float * time_faaaa = (float *) dst->src[3]->data;
-    float * time_decay = (float *) dst->src[4]->data;
+    float * k =          (float *) tensor_data(dst->src[0]);
+    float * v =          (float *) tensor_data(dst->src[1]);
+    float * r =          (float *) tensor_data(dst->src[2]);
+    float * time_faaaa = (float *) tensor_data(dst->src[3]);
+    float * time_decay = (float *) tensor_data(dst->src[4]);
 
     size_t t_stride = HEADS * head_size; // Same to C
 
@@ -13287,7 +13287,7 @@ static void ggml_compute_forward_rwkv_wkv6_f32(
             size_t t_offset = t * t_stride;
             size_t state_offset = head_size * C * (t / (T / n_seqs));
             float * state_cur = state + state_offset;
-            float * state_prev = t % (T / n_seqs) ? state_cur : (float*)dst->src[5]->data + state_offset;
+            float * state_prev = t % (T / n_seqs) ? state_cur : (float*)tensor_data(dst->src[5]) + state_offset;
 
             for (int64_t h = h_start; h < h_end; h++) {
                 size_t h_offset = h * h_stride;
@@ -13359,7 +13359,7 @@ static void ggml_compute_forward_rwkv_wkv6_f32(
             size_t t_offset = t * t_stride;
             size_t state_offset = head_size * C * (t / (T / n_seqs));
             float * state_cur = state + state_offset;
-            float * state_prev = t % (T / n_seqs) ? state_cur : (float*)dst->src[5]->data + state_offset;
+            float * state_prev = t % (T / n_seqs) ? state_cur : (float*)tensor_data(dst->src[5]) + state_offset;
 
             for (int64_t h = h_start; h < h_end; h++) {
                 size_t h_offset = h * h_stride;
@@ -13425,8 +13425,8 @@ static void ggml_compute_forward_gla_f32(
     const int64_t head_size = C / HEADS;
     const float scale = ggml_get_op_params_f32(dst, 0);
 
-    float * dst_data = (float *) dst->data;
-    float * state = ((float *) dst->data) + C * T;
+    float * dst_data = (float *) tensor_data(dst);
+    float * state = ((float *) tensor_data(dst)) + C * T;
 
     const int ith = params->ith;
     const int nth = params->nth;
@@ -13439,10 +13439,10 @@ static void ggml_compute_forward_gla_f32(
     const int h_end = ((HEADS * (ith + 1)) / nth < HEADS) ?
                 (HEADS * (ith + 1)) / nth : HEADS;
 
-    float * k = (float *) dst->src[0]->data;
-    float * v = (float *) dst->src[1]->data;
-    float * q = (float *) dst->src[2]->data;
-    float * g = (float *) dst->src[3]->data;
+    float * k = (float *) tensor_data(dst->src[0]);
+    float * v = (float *) tensor_data(dst->src[1]);
+    float * q = (float *) tensor_data(dst->src[2]);
+    float * g = (float *) tensor_data(dst->src[3]);
 
     size_t t_stride = HEADS * head_size; // Same to C
 
@@ -13489,7 +13489,7 @@ static void ggml_compute_forward_gla_f32(
             size_t t_offset = t * t_stride;
             size_t state_offset = head_size * C * (t / (T / n_seqs));
             float * state_cur = state + state_offset;
-            float * state_prev = t % (T / n_seqs) ? state_cur : (float*)dst->src[4]->data + state_offset;
+            float * state_prev = t % (T / n_seqs) ? state_cur : (float*)tensor_data(dst->src[4]) + state_offset;
 
             for (int64_t h = h_start; h < h_end; h++) {
                 size_t h_offset = h * h_stride;
@@ -13553,7 +13553,7 @@ static void ggml_compute_forward_gla_f32(
             size_t t_offset = t * t_stride;
             size_t state_offset = head_size * C * (t / (T / n_seqs));
             float * state_cur = state + state_offset;
-            float * state_prev = t % (T / n_seqs) ? state_cur : (float*)dst->src[4]->data + state_offset;
+            float * state_prev = t % (T / n_seqs) ? state_cur : (float*)tensor_data(dst->src[4]) + state_offset;
 
             for (int64_t h = h_start; h < h_end; h++) {
                 size_t h_offset = h * h_stride;
@@ -13626,8 +13626,8 @@ static void ggml_compute_forward_map_unary_f32(
 
     for (int i = 0; i < n; i++) {
         fun(nc,
-                (float *) ((char *) dst->data  + i*( dst->nb[1])),
-                (float *) ((char *) src0->data + i*(src0->nb[1])));
+                (float *) ((char *) tensor_data(dst)  + i*( dst->nb[1])),
+                (float *) ((char *) tensor_data(src0) + i*(src0->nb[1])));
     }
 }
 
@@ -13674,9 +13674,9 @@ static void ggml_compute_forward_map_binary_f32(
 
     for (int i = 0; i < n; i++) {
         fun(nc,
-                (float *) ((char *) dst->data  + i*( dst->nb[1])),
-                (float *) ((char *) src0->data + i*(src0->nb[1])),
-                (float *) ((char *) src1->data + i*(src1->nb[1])));
+                (float *) ((char *) tensor_data(dst)  + i*( dst->nb[1])),
+                (float *) ((char *) tensor_data(src0) + i*(src0->nb[1])),
+                (float *) ((char *) tensor_data(src1) + i*(src1->nb[1])));
     }
 }
 
@@ -13833,8 +13833,8 @@ static void ggml_compute_forward_cross_entropy_loss_f32(
     const int64_t ir1 = MIN(ir0 + dr, nr);
 
     for (int64_t i1 = ir0; i1 < ir1; ++i1) {
-        const float * s0 = (const float *)((const char *) src0->data + i1*src0->nb[1]);
-        const float * s1 = (const float *)((const char *) src1->data + i1*src1->nb[1]);
+        const float * s0 = (const float *)((const char *) tensor_data(src0) + i1*src0->nb[1]);
+        const float * s1 = (const float *)((const char *) tensor_data(src1) + i1*src1->nb[1]);
 
 #ifndef NDEBUG
         for (int64_t i = 0; i < nc; ++i) {
@@ -13867,7 +13867,7 @@ static void ggml_compute_forward_cross_entropy_loss_f32(
     ggml_barrier(params->threadpool);
 
     if (ith == 0) {
-        float * dp = (float *) dst->data;
+        float * dp = (float *) tensor_data(dst);
         ggml_vec_sum_f32(nth, dp, sums);
         dp[0] *= -1.0f / (float) nr;
     }
@@ -13921,12 +13921,12 @@ static void ggml_compute_forward_cross_entropy_loss_back_f32(
     const int64_t ir0 = dr*ith;
     const int64_t ir1 = MIN(ir0 + dr, nr);
 
-    const float d_by_nr = ((const float *) grad->data)[0] / (float) nr;
+    const float d_by_nr = ((const float *) tensor_data(grad))[0] / (float) nr;
 
     for (int64_t i1 = ir0; i1 < ir1; i1++) {
-        float       * ds0 = (float       *)((char       *) dst->data   + i1*dst->nb[1]);
-        const float * s0  = (const float *)((const char *) src0f->data + i1*src0f->nb[1]);
-        const float * s1  = (const float *)((const char *) src1f->data + i1*src1f->nb[1]);
+        float       * ds0 = (float       *)((char       *) tensor_data(dst)   + i1*dst->nb[1]);
+        const float * s0  = (const float *)((const char *) tensor_data(src0f) + i1*src0f->nb[1]);
+        const float * s1  = (const float *)((const char *) tensor_data(src1f) + i1*src1f->nb[1]);
 
 #ifndef NDEBUG
         for (int64_t i = 0; i < nc; ++i) {
@@ -14020,10 +14020,10 @@ static void ggml_compute_forward_opt_step_adamw_f32(
 
         const size_t offset = i03*nb03 + i02*nb02 + i01*nb01;
 
-        float       * w = (float       *) ((char       *) src0->data        + offset); // weight
-        const float * g = (const float *) ((const char *) src0_grad->data   + offset); // grad
-        float       * m = (float       *) ((char       *) src0_grad_m->data + offset);
-        float       * v = (float       *) ((char       *) src0_grad_v->data + offset);
+        float       * w = (float       *) ((char       *) tensor_data(src0)        + offset); // weight
+        const float * g = (const float *) ((const char *) tensor_data(src0_grad)   + offset); // grad
+        float       * m = (float       *) ((char       *) tensor_data(src0_grad_m) + offset);
+        float       * v = (float       *) ((char       *) tensor_data(src0_grad_v) + offset);
 
         for (int i00 = 0; i00 < ne00; ++i00) {
             m[i00] = m[i00]*beta1 +        g[i00]*(1.0f - beta1);

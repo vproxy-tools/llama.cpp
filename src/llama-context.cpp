@@ -506,7 +506,7 @@ void llm_graph_input_k_shift::set_input(const llama_ubatch * ubatch) {
     if (k_shift) {
         assert(ggml_backend_buffer_is_host(k_shift->buffer));
 
-        int32_t * data = (int32_t *) k_shift->data;
+        int32_t * data = (int32_t *) tensor_data(k_shift);
 
         for (uint32_t i = 0; i < kv_self->size; ++i) {
             data[i] = kv_self->cells[i].delta;

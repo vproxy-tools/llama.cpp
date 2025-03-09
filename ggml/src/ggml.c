@@ -1581,7 +1581,7 @@ static struct ggml_tensor * ggml_new_tensor_impl(
 
     GGML_ASSERT(view_src == NULL || data_size == 0 || data_size + view_offs <= ggml_nbytes(view_src));
 
-    void * data = view_src != NULL ? view_src->data : NULL;
+    void * data = view_src != NULL ? tensor_data(view_src) : NULL;
     if (data != NULL) {
         data = (char *) data + view_offs;
     }
@@ -1609,11 +1609,12 @@ static struct ggml_tensor * ggml_new_tensor_impl(
         /*.src          =*/ { NULL },
         /*.view_src     =*/ view_src,
         /*.view_offs    =*/ view_offs,
-        /*.data         =*/ obj_alloc_size > 0 ? (void *)(result + 1) : data,
+        /*.data         =*/ NULL,
         /*.name         =*/ { 0 },
         /*.extra        =*/ NULL,
         /*.padding      =*/ { 0 },
     };
+    tensor_set_data(result, obj_alloc_size > 0 ? (void *)(result + 1) : data);
 
     // TODO: this should not be needed as long as we don't rely on aligned SIMD loads
     //GGML_ASSERT_ALIGNED(result->data);
@@ -1713,12 +1714,12 @@ void ggml_unravel_index(const struct ggml_tensor * tensor, int64_t i, int64_t * 
 }
 
 void * ggml_get_data(const struct ggml_tensor * tensor) {
-    return tensor->data;
+    return tensor_data(tensor);
 }
 
 float * ggml_get_data_f32(const struct ggml_tensor * tensor) {
     assert(tensor->type == GGML_TYPE_F32);
-    return (float *)(tensor->data);
+    return (float *)(tensor_data(tensor));
 }
 
 enum ggml_unary_op ggml_get_unary_op(const struct ggml_tensor * tensor) {
@@ -6046,8 +6047,8 @@ struct ggml_tensor * ggml_set_zero(struct ggml_tensor * tensor) {
     if (tensor->buffer) {
         ggml_backend_tensor_memset(tensor, 0, 0, ggml_nbytes(tensor));
     } else {
-        GGML_ASSERT(tensor->data);
-        memset(tensor->data, 0, ggml_nbytes(tensor));
+        GGML_ASSERT(tensor_data(tensor));
+        memset(tensor_data(tensor), 0, ggml_nbytes(tensor));
     }
     return tensor;
 }
@@ -6075,8 +6076,8 @@ void ggml_graph_reset(struct ggml_cgraph * cgraph) {
                 if (grad_acc->buffer) {
                     ggml_backend_tensor_set(grad_acc, &onef, 0, sizeof(float));
                 } else {
-                    GGML_ASSERT(grad_acc->data);
-                    *((float *) grad_acc->data) = onef;
+                    GGML_ASSERT(tensor_data(grad_acc));
+                    *((float *) tensor_data(grad_acc)) = onef;
                 }
             } else {
                 ggml_set_zero(grad_acc);
@@ -6296,7 +6297,7 @@ void ggml_graph_dump_dot(const struct ggml_cgraph * gb, const struct ggml_cgraph
         }
 
         fprintf(fp, "CONST %d [%" PRId64 ", %" PRId64 "]", i, node->ne[0], node->ne[1]);
-        if (ggml_nelements(node) < 5 && node->data != NULL) {
+        if (ggml_nelements(node) < 5 && tensor_data(node) != NULL) {
             fprintf(fp, " | (");
             for (int j = 0; j < ggml_nelements(node); j++) {
                 // FIXME: use ggml-backend to obtain the tensor data
