@@ -607,6 +607,14 @@ extern "C" {
         char padding[8];
     };
 
+    static inline void * tensor_data(const struct ggml_tensor * tensor) {
+        return tensor->data;
+    }
+
+    static inline void tensor_set_data(struct ggml_tensor * tensor, void * data) {
+        tensor->data = data;
+    }
+
     static const size_t GGML_TENSOR_SIZE = sizeof(struct ggml_tensor);
 
     // Abort callback

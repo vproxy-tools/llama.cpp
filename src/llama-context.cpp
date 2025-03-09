@@ -13,7 +13,7 @@ void llama_set_k_shift(struct llama_context & lctx) {
 
     assert(ggml_backend_buffer_is_host(lctx.inp_K_shift->buffer));
 
-    int32_t * data = (int32_t *) lctx.inp_K_shift->data;
+    int32_t * data = (int32_t *) tensor_data(lctx.inp_K_shift);
 
     for (int i = 0; i < kv_size; ++i) {
         data[i] = lctx.kv_self.cells[i].delta;
@@ -25,7 +25,7 @@ void llama_set_s_copy(struct llama_context & lctx) {
 
     assert(ggml_backend_buffer_is_host(lctx.inp_s_copy->buffer));
 
-    int32_t * data = (int32_t *) lctx.inp_s_copy->data;
+    int32_t * data = (int32_t *) tensor_data(lctx.inp_s_copy);
 
     for (int i = 0; i < kv_size; ++i) {
         data[i] = lctx.kv_self.cells[i].src;
@@ -95,7 +95,7 @@ void llama_set_inputs(llama_context & lctx, const llama_ubatch & ubatch) {
             const int64_t n_tokens = ubatch.n_tokens;
 
             GGML_ASSERT(ggml_backend_buffer_is_host(lctx.inp_out_ids->buffer));
-            int32_t * data = (int32_t *) lctx.inp_out_ids->data;
+            int32_t * data = (int32_t *) tensor_data(lctx.inp_out_ids);
 
             if (lctx.n_outputs == n_tokens) {
                 for (int i = 0; i < n_tokens; ++i) {
@@ -140,12 +140,12 @@ void llama_set_inputs(llama_context & lctx, const llama_ubatch & ubatch) {
 
             if (lctx.inp_KQ_mask) {
                 GGML_ASSERT(ggml_backend_buffer_is_host(lctx.inp_KQ_mask->buffer));
-                data = (float *) lctx.inp_KQ_mask->data;
+                data = (float *) tensor_data(lctx.inp_KQ_mask);
             }
 
             if (lctx.inp_KQ_mask_swa) {
                 GGML_ASSERT(ggml_backend_buffer_is_host(lctx.inp_KQ_mask_swa->buffer));
-                data_swa = (float *) lctx.inp_KQ_mask_swa->data;
+                data_swa = (float *) tensor_data(lctx.inp_KQ_mask_swa);
             }
 
             // For causal attention, use only the previous KV cells
@@ -210,7 +210,7 @@ void llama_set_inputs(llama_context & lctx, const llama_ubatch & ubatch) {
 
             GGML_ASSERT(ggml_backend_buffer_is_host(lctx.inp_KQ_mask->buffer));
 
-            float * data = (float *) lctx.inp_KQ_mask->data;
+            float * data = (float *) tensor_data(lctx.inp_KQ_mask);
 
             for (int h = 0; h < 1; ++h) {
                 for (int s1 = 0; s1 < n_seqs; ++s1) {
@@ -256,8 +256,8 @@ void llama_set_inputs(llama_context & lctx, const llama_ubatch & ubatch) {
         GGML_ASSERT(lctx.inp_mean);
         GGML_ASSERT(ggml_backend_buffer_is_host(lctx.inp_mean->buffer));
 
-        float * data = (float *) lctx.inp_mean->data;
-        memset(lctx.inp_mean->data, 0, n_tokens * n_tokens * ggml_element_size(lctx.inp_mean));
+        float * data = (float *) tensor_data(lctx.inp_mean);
+        memset(tensor_data(lctx.inp_mean), 0, n_tokens * n_tokens * ggml_element_size(lctx.inp_mean));
 
         std::vector<uint64_t> sum(n_tokens, 0);
 
@@ -297,8 +297,8 @@ void llama_set_inputs(llama_context & lctx, const llama_ubatch & ubatch) {
         GGML_ASSERT(lctx.inp_cls);
         GGML_ASSERT(ggml_backend_buffer_is_host(lctx.inp_cls->buffer));
 
-        uint32_t * data = (uint32_t *) lctx.inp_cls->data;
-        memset(lctx.inp_cls->data, 0, n_tokens * ggml_element_size(lctx.inp_cls));
+        uint32_t * data = (uint32_t *) tensor_data(lctx.inp_cls);
+        memset(tensor_data(lctx.inp_cls), 0, n_tokens * ggml_element_size(lctx.inp_cls));
 
         for (int s = 0; s < n_seqs; ++s) {
             const llama_seq_id seq_id = ubatch.seq_id[s][0];
@@ -324,8 +324,8 @@ void llama_set_inputs(llama_context & lctx, const llama_ubatch & ubatch) {
         GGML_ASSERT(lctx.inp_cls);
         GGML_ASSERT(ggml_backend_buffer_is_host(lctx.inp_cls->buffer));
 
-        uint32_t * data = (uint32_t *) lctx.inp_cls->data;
-        memset(lctx.inp_cls->data, 0, n_tokens * ggml_element_size(lctx.inp_cls));
+        uint32_t * data = (uint32_t *) tensor_data(lctx.inp_cls);
+        memset(tensor_data(lctx.inp_cls), 0, n_tokens * ggml_element_size(lctx.inp_cls));
 
         std::vector<int> last_pos(n_tokens, -1);
         std::vector<int> last_row(n_tokens, -1);
@@ -358,7 +358,7 @@ void llama_set_inputs(llama_context & lctx, const llama_ubatch & ubatch) {
 
         if (lctx.inp_s_mask) {
             GGML_ASSERT(ggml_backend_buffer_is_host(lctx.inp_s_mask->buffer));
-            float * data = (float *) lctx.inp_s_mask->data;
+            float * data = (float *) tensor_data(lctx.inp_s_mask);
 
             // clear unused states
             for (int i = 0; i < n_kv; ++i) {
@@ -376,7 +376,7 @@ void llama_set_inputs(llama_context & lctx, const llama_ubatch & ubatch) {
 
         if (lctx.inp_s_copy) {
             GGML_ASSERT(ggml_backend_buffer_is_host(lctx.inp_s_copy->buffer));
-            int32_t * data = (int32_t *) lctx.inp_s_copy->data;
+            int32_t * data = (int32_t *) tensor_data(lctx.inp_s_copy);
 
             // assuming copy destinations ALWAYS happen ONLY on the cells between head and head+n
             for (uint32_t i = 0; i < n_kv; ++i) {
@@ -404,7 +404,7 @@ void llama_set_inputs(llama_context & lctx, const llama_ubatch & ubatch) {
         GGML_ASSERT(ggml_backend_buffer_is_host(lctx.inp_pos_bucket->buffer));
         GGML_ASSERT(!ubatch.equal_seqs); // TODO: use ubatch.n_seqs instead of failing
 
-        int32_t * data = (int32_t *) lctx.inp_pos_bucket->data;
+        int32_t * data = (int32_t *) tensor_data(lctx.inp_pos_bucket);
 
         if (!lctx.is_encoding) {
             const int64_t n_kv = kv_self.n;
@@ -440,7 +440,7 @@ void llama_set_inputs(llama_context & lctx, const llama_ubatch & ubatch) {
         GGML_ASSERT(ggml_backend_buffer_is_host(lctx.inp_KQ_mask_cross->buffer));
         GGML_ASSERT(!ubatch.equal_seqs); // TODO: use ubatch.n_seqs instead of failing
 
-        float * data = (float *) lctx.inp_KQ_mask_cross->data;
+        float * data = (float *) tensor_data(lctx.inp_KQ_mask_cross);
 
         for (int h = 0; h < 1; ++h) {
             for (int j = 0; j < n_tokens; ++j) {

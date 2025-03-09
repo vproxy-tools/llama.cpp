@@ -1435,7 +1435,7 @@ struct clip_ctx * clip_model_load(const char * fname, const int verbosity = 1) {
             int num_bytes = ggml_nbytes(cur);
             if (ggml_backend_buffer_is_host(new_clip->params_buffer)) {
                 // for the CPU and Metal backend, we can read directly into the tensor
-                fin.read(reinterpret_cast<char *>(cur->data), num_bytes);
+                fin.read(reinterpret_cast<char *>(tensor_data(cur)), num_bytes);
             } else {
                 // read into a temporary buffer first, then copy to device memory
                 read_buf.resize(num_bytes);
@@ -2865,14 +2865,14 @@ bool clip_model_quantize(const char * fname_inp, const char * fname_out, const i
 
             switch (cur->type) {
             case GGML_TYPE_F32:
-                f32_data = (float *)cur->data;
+                f32_data = (float *)tensor_data(cur);
                 break;
             case GGML_TYPE_F16:
                 if (conv_buf.size() < n_elms) {
                     conv_buf.resize(n_elms);
                 }
                 for (size_t j = 0; j < n_elms; ++j) {
-                    conv_buf[j] = ggml_fp16_to_fp32(((ggml_fp16_t *)cur->data)[j]);
+                    conv_buf[j] = ggml_fp16_to_fp32(((ggml_fp16_t *)tensor_data(cur))[j]);
                 }
                 f32_data = (float *)conv_buf.data();
                 break;
@@ -2890,7 +2890,7 @@ bool clip_model_quantize(const char * fname_inp, const char * fname_out, const i
             new_size = ggml_quantize_chunk(new_type, f32_data, new_data, 0, n_elms/cur->ne[0], cur->ne[0], nullptr);
         } else {
             new_type = cur->type;
-            new_data = cur->data;
+            new_data = tensor_data(cur);
             new_size = ggml_nbytes(cur);
         }
         const size_t orig_size = ggml_nbytes(cur);
