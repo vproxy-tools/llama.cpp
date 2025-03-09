@@ -159,14 +159,14 @@ void ggml_opt_dataset_get_batch(ggml_opt_dataset_t dataset, struct ggml_tensor *
     for (int64_t ishard_batch = 0; ishard_batch < shards_per_batch; ++ishard_batch) {
         const int64_t ishard = dataset->permutation[ibatch*shards_per_batch + ishard_batch];
 
-        const char * ptr_data = (const char *) dataset->data->data + ishard*dataset->nbs_data;
+        const char * ptr_data = (const char *) tensor_data(dataset->data) + ishard*dataset->nbs_data;
         ggml_backend_tensor_set(data_batch, ptr_data, ishard_batch*dataset->nbs_data, dataset->nbs_data);
 
         if (!labels_batch) {
             continue;
         }
 
-        const char * ptr_labels = (const char *) dataset->labels->data + ishard*dataset->nbs_labels;
+        const char * ptr_labels = (const char *) tensor_data(dataset->labels) + ishard*dataset->nbs_labels;
         ggml_backend_tensor_set(labels_batch, ptr_labels, ishard_batch*dataset->nbs_labels, dataset->nbs_labels);
     }
 }
@@ -225,7 +225,7 @@ static ggml_tensor * map_tensor(std::map<ggml_tensor *, ggml_tensor *> & tensor_
     new_tensor->flags = tensor->flags;
     memcpy(new_tensor->op_params, tensor->op_params, sizeof(tensor->op_params));
     strcpy(new_tensor->name, tensor->name);
-    new_tensor->data = tensor->data;
+    tensor_set_data(new_tensor, tensor_data(tensor));
     new_tensor->buffer = tensor->buffer;
     new_tensor->extra = tensor->extra;
     new_tensor->view_offs = tensor->view_offs;
@@ -300,7 +300,7 @@ ggml_opt_context_t ggml_opt_init(struct ggml_opt_params params) {
     result->get_opt_pars    = params.get_opt_pars;
     result->get_opt_pars_ud = params.get_opt_pars_ud;
 
-    GGML_ASSERT(result->inputs->data && "the inputs must be allocated statically");
+    GGML_ASSERT(tensor_data(result->inputs) && "the inputs must be allocated statically");
     GGML_ASSERT(result->opt_period >= 1);
 
     const bool accumulate = params.build_type == GGML_OPT_BUILD_TYPE_GRAD ||
