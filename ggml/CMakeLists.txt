@@ -318,14 +318,39 @@ set(variable_set_statements
 set(GGML_SHARED_LIB ${BUILD_SHARED_LIBS})
 
 if (GGML_NUMA_MIRROR)
+    find_library(NUMA_LIBRARY NAMES numa)
+    if (!NUMA_LIBRARY)
+        message(FATAL_ERROR "libnuma is not found")
+    endif()
+    message(STATUS "libnuma: ${NUMA_LIBRARY}")
+
+    if (NOT DEFINED GGML_MMAP_VIRTUAL_MEMORY_BASE_OFFSET)
+        set(GGML_MMAP_VIRTUAL_MEMORY_BASE_OFFSET "0x200000000000ULL")
+    endif()
+    if (NOT DEFINED GGML_MMAP_VIRTUAL_MEMORY_NUMA_INCREMENT)
+        set(GGML_MMAP_VIRTUAL_MEMORY_NUMA_INCREMENT "0x200000000000ULL")
+    endif()
+    if (NOT DEFINED GGML_MMAP_HUGEPAGESZ)
+        set(GGML_MMAP_HUGEPAGESZ "1073741824ULL")
+    endif()
+
     message(STATUS
             "-----------------\n"
-            "Enabling GGML_NUMA_MIRROR"
+            "Enabling GGML_NUMA_MIRROR\n"
+            "Hugepages must be reserved properly,\n"
+            "and your program should have write access to /dev/hugepages\n"
+            "GGML_MMAP_VIRTUAL_MEMORY_BASE_OFFSET    = ${GGML_MMAP_VIRTUAL_MEMORY_BASE_OFFSET}\n"
+            "GGML_MMAP_VIRTUAL_MEMORY_NUMA_INCREMENT = ${GGML_MMAP_VIRTUAL_MEMORY_NUMA_INCREMENT}\n"
+            "GGML_MMAP_HUGEPAGESZ                    = ${GGML_MMAP_HUGEPAGESZ}")
     message(STATUS
             "-----------------")
 
     foreach(lib "ggml" "ggml-base")
         target_compile_definitions(${lib} PUBLIC GGML_NUMA_MIRROR)
+        target_compile_definitions(${lib} PUBLIC GGML_MMAP_VIRTUAL_MEMORY_BASE_OFFSET=${GGML_MMAP_VIRTUAL_MEMORY_BASE_OFFSET})
+        target_compile_definitions(${lib} PUBLIC GGML_MMAP_VIRTUAL_MEMORY_NUMA_INCREMENT=${GGML_MMAP_VIRTUAL_MEMORY_NUMA_INCREMENT})
+        target_compile_definitions(${lib} PUBLIC GGML_MMAP_HUGEPAGESZ=${GGML_MMAP_HUGEPAGESZ})
+        target_link_libraries(${lib} PUBLIC ${NUMA_LIBRARY})
     endforeach()
 endif()
 

@@ -11,6 +11,11 @@
 #include "ggml-threading.h"
 #include "ggml.h"
 
+#ifdef GGML_NUMA_MIRROR
+#include <numa.h>
+#include <numaif.h>
+#endif
+
 #if defined(_MSC_VER) || defined(__MINGW32__)
 #include <malloc.h> // using malloc.h with MSC/MINGW
 #elif !defined(__FreeBSD__) && !defined(__NetBSD__) && !defined(__OpenBSD__)
@@ -15180,6 +15185,11 @@ struct ggml_cplan ggml_graph_plan(
     return cplan;
 }
 
+#ifdef GGML_NUMA_MIRROR
+static bool g_cpuset_isset = false;
+static cpu_set_t g_cpuset;
+#endif
+
 static thread_ret_t ggml_graph_compute_thread(void * data) {
     struct ggml_compute_state * state = (struct ggml_compute_state *) data;
     struct ggml_threadpool    * tp    = state->threadpool;
@@ -15196,6 +15206,51 @@ static thread_ret_t ggml_graph_compute_thread(void * data) {
         /*.wdata     =*/ cplan->work_data,
         /*.threadpool=*/ tp,
     };
+
+#ifdef GGML_NUMA_MIRROR
+    if (GGML_UNLIKELY(ggml_current_numa_node == -1)) {
+        int thread_id = state->ith;
+        int total_threads = tp->n_threads_max;
+
+        ggml_current_numa_node = !!!(thread_id < (total_threads / 2));
+
+        struct bitmask* mask = numa_bitmask_alloc(numa_num_configured_nodes());
+        numa_bitmask_setbit(mask, ggml_current_numa_node);
+        numa_bind(mask);
+
+        bool cpumask[GGML_MAX_N_THREADS];
+        memset(cpumask, 0, sizeof(bool) * GGML_MAX_N_THREADS);
+        for (int i = 0; i < GGML_MAX_N_THREADS; ++i) {
+            if (CPU_ISSET(i, &g_cpuset)) {
+                cpumask[i] = true;
+            }
+        }
+
+        int cpuid = -1;
+        bool local_mask[GGML_MAX_N_THREADS];
+        int iter = 0;
+        for (int j = 0; j < thread_id; ++j) {
+            ggml_thread_cpumask_next(cpumask, local_mask, true, &iter);
+        }
+        memset(local_mask, 0, sizeof(bool) * GGML_MAX_N_THREADS);
+        ggml_thread_cpumask_next(cpumask, local_mask, true, &iter);
+        for (int i = 0; i < GGML_MAX_N_THREADS; ++i) {
+            if (local_mask[i]) {
+                cpuid = i;
+                break;
+            }
+        }
+
+        if (cpuid != -1) {
+            cpu_set_t cpuset;
+            CPU_ZERO(&cpuset);
+            CPU_SET(cpuid, &cpuset);
+            sched_setaffinity(gettid(), sizeof(cpuset), &cpuset);
+        }
+
+        GGML_LOG_INFO("thread_id = %02d, node = %d, cpuid = %02d\n", thread_id, ggml_current_numa_node, cpuid);
+    }
+#endif // GGML_NUMA_MIRROR
 
     for (int node_n = 0; node_n < cgraph->n_nodes && atomic_load_explicit(&tp->abort, memory_order_relaxed) != node_n; node_n++) {
         struct ggml_tensor * node = cgraph->nodes[node_n];
@@ -15463,6 +15518,14 @@ enum ggml_status ggml_graph_compute(struct ggml_cgraph * cgraph, struct ggml_cpl
         threadpool->abort            = -1;
         threadpool->ec               = GGML_STATUS_SUCCESS;
     }
+
+#ifdef GGML_NUMA_MIRROR
+    if (!g_cpuset_isset) {
+        CPU_ZERO(&g_cpuset);
+        sched_getaffinity(getpid(), sizeof(g_cpuset), &g_cpuset);
+        g_cpuset_isset = true;
+    }
+#endif
 
 #ifdef GGML_USE_OPENMP
     if (n_threads > 1) {

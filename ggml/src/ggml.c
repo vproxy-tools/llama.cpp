@@ -61,7 +61,7 @@
 #endif
 
 #ifdef GGML_NUMA_MIRROR
-__thread int ggml_current_numa_node = 0;
+__thread int ggml_current_numa_node = -1;
 #endif
 
 // precomputed f32 table for f16 (256 KB) (ggml-impl.h)
