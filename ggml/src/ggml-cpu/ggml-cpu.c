@@ -15210,13 +15210,6 @@ static thread_ret_t ggml_graph_compute_thread(void * data) {
 #ifdef GGML_NUMA_MIRROR
     if (GGML_UNLIKELY(ggml_current_numa_node == -1)) {
         int thread_id = state->ith;
-        int total_threads = tp->n_threads_max;
-
-        ggml_current_numa_node = !!!(thread_id < (total_threads / 2));
-
-        struct bitmask* mask = numa_bitmask_alloc(numa_num_configured_nodes());
-        numa_bitmask_setbit(mask, ggml_current_numa_node);
-        numa_bind(mask);
 
         bool cpumask[GGML_MAX_N_THREADS];
         memset(cpumask, 0, sizeof(bool) * GGML_MAX_N_THREADS);
@@ -15247,6 +15240,14 @@ static thread_ret_t ggml_graph_compute_thread(void * data) {
             CPU_SET(cpuid, &cpuset);
             sched_setaffinity(gettid(), sizeof(cpuset), &cpuset);
         }
+
+        unsigned int numa_node = 0;
+        getcpu(NULL, &numa_node);
+        ggml_current_numa_node = numa_node;
+
+        struct bitmask* mask = numa_bitmask_alloc(numa_num_configured_nodes());
+        numa_bitmask_setbit(mask, ggml_current_numa_node);
+        numa_set_membind(mask);
 
         GGML_LOG_INFO("thread_id = %02d, node = %d, cpuid = %02d\n", thread_id, ggml_current_numa_node, cpuid);
     }
