@@ -27,6 +27,14 @@
 #include <sys/sysctl.h>
 #endif
 
+#if GGML_NUMA_MIRROR
+#include <numa.h>
+#include <numaif.h>
+#include <sys/mman.h>
+#include <unistd.h>
+#include <fcntl.h>
+#endif
+
 
 // backend buffer type
 
@@ -239,6 +247,126 @@ void ggml_backend_tensor_set_async(ggml_backend_t backend, struct ggml_tensor * 
         backend->iface.set_tensor_async(backend, tensor, data, offset, size);
     }
 }
+
+#ifdef GGML_NUMA_MIRROR
+struct ggml_memmgr {
+    void* raw;
+    void* mm;
+    size_t used;
+    size_t cap;
+    bool is_new_mem;
+};
+
+struct ggml_memmgr ggml_numa_memmgr[2];
+
+static void* _numa_alloc_onnode(size_t size, int node) {
+    struct ggml_memmgr* mgr = &ggml_numa_memmgr[node];
+    if (mgr->mm == NULL) {
+        int oldpolicy;
+        struct bitmask* oldmask = numa_allocate_nodemask();
+        if (get_mempolicy(&oldpolicy, oldmask->maskp,
+                          oldmask->size + 1, 0, 0) < 0) {
+printf("get_mempolicy failed, errno=%d %s\n", errno, strerror(errno));
+fflush(stdout);
+            oldpolicy = MPOL_DEFAULT;
+        }
+        numa_set_preferred(node);
+printf("numa_set_preferred(%d)\n", node);
+fflush(stdout);
+
+        char path[128];
+        for (int i = 0; i * GGML_MMAP_HUGEPAGESZ < GGML_PER_NUMA_HUGE_MEM; ++i) {
+            sprintf(path, "/dev/hugepages/llama-node%d-%d", node, i);
+            if (!mgr->is_new_mem) {
+                mgr->is_new_mem = access(path, F_OK) != 0;
+            }
+
+            int hugefd = open(path, O_CREAT | O_RDWR, 0600);
+            if (hugefd < 0) {
+printf("unable to make hugefd, %d %s\n", errno, strerror(errno));
+fflush(stdout);
+                return NULL;
+            }
+            uintptr_t address = GGML_MMAP_VIRTUAL_MEMORY_BASE_OFFSET + \
+                    node * GGML_MMAP_VIRTUAL_MEMORY_NUMA_INCREMENT + \
+                    i * GGML_MMAP_HUGEPAGESZ;
+            void* mm = mmap((void*)address, GGML_MMAP_HUGEPAGESZ, PROT_READ | PROT_WRITE,
+                            MAP_SHARED | MAP_HUGETLB | MAP_POPULATE,
+                            hugefd, 0);
+            close(hugefd);
+printf("mmap(%s) desire=%p size=%llu result=%p is_new_mem=%s\n", path, (void*)address, GGML_MMAP_HUGEPAGESZ, mm, mgr->is_new_mem ? "yes" : "no");
+fflush(stdout);
+            if (mm != (void*)address) {
+printf("mmap failed! %d %s\n", errno, strerror(errno));
+fflush(stdout);
+                return NULL;
+            }
+        }
+
+        if (mgr->is_new_mem) {
+            memset((void*)(GGML_MMAP_VIRTUAL_MEMORY_BASE_OFFSET + \
+                           node * GGML_MMAP_VIRTUAL_MEMORY_NUMA_INCREMENT),
+                           0, GGML_PER_NUMA_HUGE_MEM);
+        }
+
+        if (oldpolicy == MPOL_DEFAULT) {
+            numa_set_localalloc();
+        } else {
+            set_mempolicy(oldpolicy, oldmask->maskp,
+                          oldmask->size + 1);
+        }
+        numa_free_cpumask(oldmask);
+
+        mgr->raw = (void*)(GGML_MMAP_VIRTUAL_MEMORY_BASE_OFFSET + \
+                           node * GGML_MMAP_VIRTUAL_MEMORY_NUMA_INCREMENT);
+        mgr->mm = (void*) (((size_t)mgr->raw + GGML_MEM_SEG_ALIGN - 1) & ~(GGML_MEM_SEG_ALIGN - 1));
+        mgr->used = 0;
+        mgr->cap = GGML_PER_NUMA_HUGE_MEM - ((size_t)mgr->mm - (size_t)mgr->raw);
+    }
+    if (mgr->used > mgr->cap) {
+printf("node = %d, alloc = %lu, used(before) = %lu, exceeds %lu\n", node, size, mgr->used, mgr->cap);
+fflush(stdout);
+        return NULL;
+    }
+    void* ret = (void*)((size_t)mgr->mm + mgr->used);
+    mgr->used += size;
+    if (mgr->used > mgr->cap) {
+printf("node = %d, alloc = %lu, used(after) = %lu, exceeds %lu\n", node, size, mgr->used, mgr->cap);
+fflush(stdout);
+        mgr->used -= size;
+        return NULL;
+    }
+    mgr->used = (mgr->used + GGML_MEM_SEG_ALIGN - 1) & ~(GGML_MEM_SEG_ALIGN - 1);
+printf("allocated %lu on node %d, used %lf%%\n", size, node, (double)mgr->used / GGML_PER_NUMA_HUGE_MEM * 100);
+fflush(stdout);
+    return ret;
+}
+
+static void* numa_alloc(const void * data, size_t size) {
+    auto data1 = _numa_alloc_onnode(size, 1);
+    GGML_ASSERT(data1 != NULL && "failed to allocate memory on node 1");
+    memcpy(data1, data, size);
+
+    auto data0 = _numa_alloc_onnode(size, 0);
+    GGML_ASSERT(data0 != NULL && "failed to allocate memory on node 0");
+    memcpy(data0, data, size);
+
+    return data0;
+}
+
+void ggml_backend_tensor_set_numa(struct ggml_tensor * tensor, const void * data, size_t offset, size_t size) {
+    if ((uint64_t)data >= \
+            GGML_MMAP_VIRTUAL_MEMORY_BASE_OFFSET && \
+        (uint64_t)data < \
+            GGML_MMAP_VIRTUAL_MEMORY_BASE_OFFSET + 2 * GGML_MMAP_VIRTUAL_MEMORY_NUMA_INCREMENT) {
+        ggml_backend_tensor_set(tensor, data, offset, size);
+        return;
+    }
+
+    void* data_new = numa_alloc(data, size);
+    ggml_backend_tensor_set(tensor, data_new, offset, size);
+}
+#endif
 
 void ggml_backend_tensor_get_async(ggml_backend_t backend, const struct ggml_tensor * tensor, void * data, size_t offset, size_t size) {
     GGML_ASSERT(tensor_data(tensor) != NULL && "tensor not allocated");
@@ -1874,7 +2002,20 @@ static void ggml_backend_cpu_buffer_memset_tensor(ggml_backend_buffer_t buffer, 
 }
 
 static void ggml_backend_cpu_buffer_set_tensor(ggml_backend_buffer_t buffer, struct ggml_tensor * tensor, const void * data, size_t offset, size_t size) {
-    memcpy((char *)tensor_data(tensor) + offset, data, size);
+#if GGML_NUMA_MIRROR
+    if ((uint64_t)data >= GGML_MMAP_VIRTUAL_MEMORY_BASE_OFFSET && \
+            (uint64_t)data < GGML_MMAP_VIRTUAL_MEMORY_BASE_OFFSET + \
+            GGML_MMAP_VIRTUAL_MEMORY_NUMA_INCREMENT) {
+        // FIXME: only makes it work for ollama
+        GGML_ASSERT(offset == 0 && "offset is not 0");
+        GGML_ASSERT(size == ggml_nbytes(tensor) && "size mismatches the tensor nbytes");
+        tensor_set_data(tensor, const_cast<void*>(data));
+    } else {
+#endif
+        memcpy((char *)tensor_data(tensor) + offset, data, size);
+#if GGML_NUMA_MIRROR
+    }
+#endif
 
     GGML_UNUSED(buffer);
 }

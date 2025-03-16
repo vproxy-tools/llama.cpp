@@ -326,6 +326,12 @@ if (GGML_NUMA_MIRROR)
     if (NOT DEFINED GGML_MMAP_HUGEPAGESZ)
         set(GGML_MMAP_HUGEPAGESZ "1073741824ULL")
     endif()
+    if (NOT DEFINED GGML_PER_NUMA_HUGE_MEM)
+        set(GGML_PER_NUMA_HUGE_MEM "64424509440ULL")
+    endif()
+    if (NOT DEFINED GGML_MEM_SEG_ALIGN)
+        set(GGML_MEM_SEG_ALIGN "256")
+    endif()
 
     message(STATUS
             "-----------------\n"
@@ -334,7 +340,9 @@ if (GGML_NUMA_MIRROR)
             "and your program should have write access to /dev/hugepages\n"
             "GGML_MMAP_VIRTUAL_MEMORY_BASE_OFFSET    = ${GGML_MMAP_VIRTUAL_MEMORY_BASE_OFFSET}\n"
             "GGML_MMAP_VIRTUAL_MEMORY_NUMA_INCREMENT = ${GGML_MMAP_VIRTUAL_MEMORY_NUMA_INCREMENT}\n"
-            "GGML_MMAP_HUGEPAGESZ                    = ${GGML_MMAP_HUGEPAGESZ}")
+            "GGML_MMAP_HUGEPAGESZ                    = ${GGML_MMAP_HUGEPAGESZ}\n"
+            "GGML_PER_NUMA_HUGE_MEM                  = ${GGML_PER_NUMA_HUGE_MEM}\n"
+            "GGML_MEM_SEG_ALIGN                      = ${GGML_MEM_SEG_ALIGN}")
     message(STATUS
             "-----------------")
 
@@ -343,6 +351,8 @@ if (GGML_NUMA_MIRROR)
         target_compile_definitions(${lib} PUBLIC GGML_MMAP_VIRTUAL_MEMORY_BASE_OFFSET=${GGML_MMAP_VIRTUAL_MEMORY_BASE_OFFSET})
         target_compile_definitions(${lib} PUBLIC GGML_MMAP_VIRTUAL_MEMORY_NUMA_INCREMENT=${GGML_MMAP_VIRTUAL_MEMORY_NUMA_INCREMENT})
         target_compile_definitions(${lib} PUBLIC GGML_MMAP_HUGEPAGESZ=${GGML_MMAP_HUGEPAGESZ})
+        target_compile_definitions(${lib} PUBLIC GGML_PER_NUMA_HUGE_MEM=${GGML_PER_NUMA_HUGE_MEM})
+        target_compile_definitions(${lib} PUBLIC GGML_MEM_SEG_ALIGN=${GGML_MEM_SEG_ALIGN})
         target_link_libraries(${lib} PUBLIC ${NUMA_LIBRARY})
     endforeach()
 endif()
